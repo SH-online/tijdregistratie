@@ -1467,7 +1467,7 @@
             }
             
             // Create CSV content (same as original)
-            let csvContent = 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n';
+            let csvContent = 'Werknemer;Afdeling;Datum;Tijd;Activiteit;Uren\n';
             
             newRegistrations.forEach(reg => {
                 if (reg.hours && typeof reg.hours === 'object') {
@@ -1475,18 +1475,18 @@
                         Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
                             const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
                             Object.entries(activities).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
+                                csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${reg.time || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
                             });
                         });
                     } else {
                         Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            csvContent += `${reg.employee || 'Onbekend'},${reg.workLineName || 'Onbekend'},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
+                            csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${reg.time || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
                         });
                     }
                 }
             });
             
-            if (csvContent === 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n') {
+            if (csvContent === 'Werknemer;Afdeling;Datum;Tijd;Activiteit;Uren\n') {
                 showStatus('Geen geldige gegevens om te versturen', 'error');
                 return false;
             }
@@ -2165,7 +2165,7 @@
             }
             
             // Maak CSV van nieuwe gegevens
-            let csvContent = 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n';
+            let csvContent = 'Werknemer;Afdeling;Datum;Tijd;Activiteit;Uren\n';
             
             newRegistrations.forEach(reg => {
                 if (reg.hours && typeof reg.hours === 'object') {
@@ -2174,7 +2174,7 @@
                         Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
                             const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
                             Object.entries(activities).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
+                                csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${reg.time || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
                             });
                         });
                     } else {
@@ -2186,7 +2186,7 @@
                 }
             });
             
-            if (csvContent === 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n') {
+            if (csvContent === 'Werknemer;Afdeling;Datum;Tijd;Activiteit;Uren\n') {
                 showStatus('Geen geldige gegevens om te versturen', 'error');
                 return;
             }
@@ -2251,7 +2251,7 @@
                 return;
             }
             
-            let csvContent = 'Werknemer,Afdeling,Datum,Activiteit,Uren\n';
+            let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
             
             registrations.forEach(reg => {
                 if (reg.hours && typeof reg.hours === 'object') {
@@ -2260,19 +2260,19 @@
                         Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
                             const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
                             Object.entries(activities).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${activity},${hours}\n`;
+                                csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
                             });
                         });
                     } else {
                         // Oude format (direct activities)
                         Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            csvContent += `${reg.employee || 'Onbekend'},${reg.workLineName || 'Onbekend'},${reg.date || 'Onbekend'},${activity},${hours}\n`;
+                            csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
                         });
                     }
                 }
             });
             
-            if (csvContent === 'Werknemer,Afdeling,Datum,Activiteit,Uren\n') {
+            if (csvContent === 'Werknemer;Afdeling;Datum;Activiteit;Uren\n') {
                 showStatus('Geen geldige data om te downloaden', 'error');
                 return;
             }
