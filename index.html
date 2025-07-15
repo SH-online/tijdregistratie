@@ -843,6 +843,27 @@
             }
         }
 
+        /* Styling voor alle registraties overzicht */
+        .all-registrations-overview {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            background: white;
+            overflow: hidden;
+        }
+
+        .all-registrations-overview pre {
+            background: #fff;
+            padding: 20px;
+            margin: 0;
+            border-radius: 0;
+            font-size: 0.9em;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+            min-height: 100px;
+            line-height: 1.4;
+        }
+
         /* Touch-friendly improvements */
         @media (hover: none) {
             .employee-btn:hover,
@@ -920,13 +941,13 @@
         <!-- Stap 2: Werklijn selecteren -->
         <div class="section hidden" id="workline-selection">
             <h2>2. Kies afdeling:</h2>
-            <div class="employee-grid" id="workline-grid">
-                <button class="workline-btn" onclick="selectWorkLine('schillijn')">Schillijn</button>
-                <button class="workline-btn" onclick="selectWorkLine('inpakken')">Inpakken</button>
-                <button class="workline-btn" onclick="selectWorkLine('sousvide')">Sous-vide</button>
-                <button class="workline-btn" onclick="selectWorkLine('koelcel')">Koelcel</button>
-                <button class="workline-btn" onclick="selectWorkLine('fusthal')">Fusthal</button>
-                <button class="workline-btn" onclick="selectWorkLine('puree')">Puree</button>
+            <div id="workline-grid" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 12px; margin-bottom: 25px; padding: 20px; border: 2px solid #dee2e6; border-radius: 12px; background: #f8f9fa;">
+                <button class="workline-btn" onclick="selectWorkLine('schillijn')" style="flex: 1 !important;">Schillijn</button>
+                <button class="workline-btn" onclick="selectWorkLine('inpakken')" style="flex: 1 !important;">Inpakken</button>
+                <button class="workline-btn" onclick="selectWorkLine('sousvide')" style="flex: 1 !important;">Sous-vide</button>
+                <button class="workline-btn" onclick="selectWorkLine('koelcel')" style="flex: 1 !important;">Koelcel</button>
+                <button class="workline-btn" onclick="selectWorkLine('fusthal')" style="flex: 1 !important;">Fusthal</button>
+                <button class="workline-btn" onclick="selectWorkLine('puree')" style="flex: 1 !important;">Puree</button>
             </div>
         </div>
 
@@ -965,7 +986,7 @@
         <!-- Data overzicht en download -->
         <div class="section">
             <div class="data-overview">
-                <h3>Registraties per afdeling:</h3>
+                <h3>Uren per afdeling:</h3>
                 
                 <div class="departments-row">
                     <!-- Schillijn -->
@@ -1004,6 +1025,16 @@
                     <div class="department-overview">
                         <h4>Puree</h4>
                         <pre id="puree-preview">Nog geen registraties</pre>
+                    </div>
+                </div>
+
+                <!-- Werknemers totalen -->
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px; color: #495057; font-size: 1.4em; font-weight: 600;">
+                        Uren per werknemer (vandaag):
+                    </h3>
+                    <div class="all-registrations-overview">
+                        <pre id="employee-totals-preview">Nog geen registraties</pre>
                     </div>
                 </div>
             </div>
@@ -1263,7 +1294,7 @@
             
             // Upload triggers:
             const shouldUpload = 
-                unsentRegs.length >= 5 ||  // 5+ registraties pending
+                unsentRegs.length >= 10 ||  // 10+ registraties pending
                 (lastUpload && (now - parseInt(lastUpload)) > 4 * 60 * 60 * 1000) || // 4 uur geleden
                 !lastUpload; // Eerste keer
             
@@ -1308,7 +1339,7 @@
                 !lastUpload || // Nog nooit geüpload
                 !lastAppOpen || // Eerste keer app openen
                 (now - parseInt(lastUpload)) > 4 * 60 * 60 * 1000 || // >4 uur sinds laatste upload
-                unsentRegs.length >= 5 // Of 5+ registraties pending
+                unsentRegs.length >= 10 // Of 10+ registraties pending
             );
             
             if (needsUpload) {
@@ -1358,35 +1389,7 @@
 
         // Handmatige upload controls toevoegen
         function addManualUploadControls() {
-            const controlsDiv = document.querySelector('.controls');
-            if (controlsDiv && !document.getElementById('manual-upload-btn')) {
-                const uploadBtn = document.createElement('button');
-                uploadBtn.id = 'manual-upload-btn';
-                uploadBtn.textContent = 'Upload Nu';
-                uploadBtn.className = 'btn btn-secondary';
-                uploadBtn.style.marginLeft = '15px';
-                uploadBtn.onclick = async () => {
-                    if (!account) {
-                        showStatus('Login eerst bij Microsoft', 'error');
-                        return;
-                    }
-                    
-                    const unsentRegs = getUnsentRegistrations();
-                    if (unsentRegs.length === 0) {
-                        showStatus('Geen pending registraties om te uploaden', 'error');
-                        return;
-                    }
-                    
-                    showStatus(`Handmatig uploaden van ${unsentRegs.length} registraties...`, 'success');
-                    const success = await sendDataToOneDrive();
-                    
-                    if (success) {
-                        showStatus(`${unsentRegs.length} registraties handmatig geüpload!`, 'success');
-                    }
-                };
-                
-                controlsDiv.appendChild(uploadBtn);
-            }
+            // Verwijderd - geen handmatige upload knop meer naast opslaan
         }
 
         // Update UI based on sign-in status
@@ -1490,7 +1493,7 @@
             
             // Upload to OneDrive instead of downloading
             const now = new Date();
-            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
+            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,8).replace(/:/g, '')}`;
             const fileName = `tijdregistratie_versturen_${timestamp}.csv`;
             
             const success = await uploadCSVToOneDrive(csvContent, fileName);
@@ -2011,14 +2014,20 @@
             }, 4000);
         }
 
-        // Data preview updaten (per afdeling in aparte vakken)
+        // Data preview updaten - OMGEDRAAIDE LOGICA
         function updateDataPreview() {
+            const today = new Date().toISOString().split('T')[0];
+            
             // Reset alle department previews
             const departments = ['schillijn', 'inpakken', 'sousvide', 'koelcel', 'fusthal', 'puree'];
             departments.forEach(dept => {
                 const preview = document.getElementById(`${dept}-preview`);
                 if (preview) preview.textContent = 'Nog geen registraties';
             });
+            
+            // Reset werknemers totalen preview
+            const employeeTotalsPreview = document.getElementById('employee-totals-preview');
+            if (employeeTotalsPreview) employeeTotalsPreview.textContent = 'Nog geen registraties';
             
             if (!registrations || registrations.length === 0) {
                 return;
@@ -2033,7 +2042,7 @@
                 return timeB.localeCompare(timeA);
             });
             
-            // Groepeer per afdeling
+            // LOSSE REGISTRATIES PER AFDELING (zoals vroeger)
             const departmentData = {
                 schillijn: [],
                 inpakken: [],
@@ -2043,38 +2052,57 @@
                 puree: []
             };
             
+            // WERKNEMERS TOTALEN VOOR VANDAAG
+            const employeeTotals = {};
+            
             sortedRegistrations.forEach(reg => {
                 if (!reg.hours) return;
+                
+                const isToday = reg.date === today;
                 
                 if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
                     // Nieuwe format (object met werklijnen als keys)
                     Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                        if (departmentData[workLineKey]) {
+                        if (departments.includes(workLineKey)) {
+                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                            
                             Object.entries(activities).forEach(([activity, hours]) => {
+                                // Voor afdeling overzicht (alle data)
                                 departmentData[workLineKey].push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
+                                
+                                // Voor werknemers totalen (alleen vandaag)
+                                if (isToday) {
+                                    if (!employeeTotals[reg.employee]) {
+                                        employeeTotals[reg.employee] = { totalHours: 0, details: [] };
+                                    }
+                                    employeeTotals[reg.employee].totalHours += hours;
+                                    employeeTotals[reg.employee].details.push(`${workLineName}: ${activity} (${hours}u)`);
+                                }
                             });
                         }
                     });
                 } else if (reg.workLineName) {
                     // Enkele werklijn format - zoek de workLineKey
                     const workLineKey = Object.keys(workLines).find(key => workLines[key].name === reg.workLineName);
-                    if (workLineKey && departmentData[workLineKey]) {
+                    if (workLineKey && departments.includes(workLineKey)) {
                         Object.entries(reg.hours).forEach(([activity, hours]) => {
+                            // Voor afdeling overzicht (alle data)
                             departmentData[workLineKey].push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
+                            
+                            // Voor werknemers totalen (alleen vandaag)
+                            if (isToday) {
+                                if (!employeeTotals[reg.employee]) {
+                                    employeeTotals[reg.employee] = { totalHours: 0, details: [] };
+                                }
+                                employeeTotals[reg.employee].totalHours += hours;
+                                employeeTotals[reg.employee].details.push(`${reg.workLineName}: ${activity} (${hours}u)`);
+                            }
                         });
                     }
-                } else {
-                    // Oude format - probeer te raden op basis van activiteiten (fallback)
-                    Object.entries(reg.hours).forEach(([activity, hours]) => {
-                        // Voeg toe aan 'onbekend' of eerste afdeling als fallback
-                        if (departmentData.schillijn) {
-                            departmentData.schillijn.push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
-                        }
-                    });
                 }
             });
             
-            // Update elke afdeling preview
+            // Update afdeling previews (losse registraties)
             Object.entries(departmentData).forEach(([deptKey, lines]) => {
                 const preview = document.getElementById(`${deptKey}-preview`);
                 if (preview) {
@@ -2085,6 +2113,23 @@
                     }
                 }
             });
+            
+            // Update werknemers totalen preview
+            if (employeeTotalsPreview) {
+                const employeeLines = [];
+                Object.entries(employeeTotals)
+                    .sort(([a], [b]) => a.localeCompare(b)) // Sorteer op naam
+                    .forEach(([employee, data]) => {
+                        const detailsText = data.details.join(', ');
+                        employeeLines.push(`${employee} (${data.totalHours.toFixed(2)}u) - ${detailsText}`);
+                    });
+                
+                if (employeeLines.length > 0) {
+                    employeeTotalsPreview.textContent = employeeLines.join('\n');
+                } else {
+                    employeeTotalsPreview.textContent = 'Nog geen registraties';
+                }
+            }
         }
 
         // Gegevens versturen (fallback voor als OneDrive niet beschikbaar is)
