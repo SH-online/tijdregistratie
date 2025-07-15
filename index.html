@@ -1,1122 +1,4 @@
-    <script src="https://alcdn.msauth.net/browser/2.32.2/js/msal-browser.min.js"></script>
-    <script>
-        // BELANGRIJKE DEBUG: FORCEER CORRECTE REDIRECT URI
-        console.log('=== MSAL CONFIG DEBUG ===');
-        
-        // Microsoft Graph API configuratie - gebruik HTTPS localhost
-        const REDIRECT_URI = 'https://sh-online.github.io/tijdregistratie/';
-        console.log('Using redirect URI:', REDIRECT_URI);
-        
-        const msalConfig = {
-            auth: {
-                clientId: 'b6bac90f-29af-4137-a5f0-be4387796f56',
-                authority: 'https://login.microsoftonline.com/common',
-                redirectUri: REDIRECT_URI
-            },
-            cache: {
-                cacheLocation: 'localStorage',
-                storeAuthStateInCookie: false
-            }
-        };
-
-        console.log('MSAL Config:', JSON.stringify(msalConfig, null, 2));
-
-        // Graph API scopes voor OneDrive
-        const loginRequest = {
-            scopes: ['Files.ReadWrite', 'User.Read'],
-            redirectUri: REDIRECT_URI  // Ook hier expliciet zetten
-        };
-
-        console.log('Login Request:', JSON.stringify(loginRequest, null, 2));
-
-        // Initialize MSAL
-        let msalInstance;
-        let account = null;
-
-        // Configuratie voor verschillende werklijnen
-        const workLines = {
-            'schillijn': {
-                name: 'Schillijn',
-                activities: ['Produceren', 'Lezen', 'Sous-vide', 'Herbewerken', 'Schoonmaken', 'Overig']
-            },
-            'inpakken': {
-                name: 'Inpakken', 
-                activities: ['Produceren', 'Kratten', 'Herbewerken', 'Schoonmaken', 'Overig']
-            },
-            'sousvide': {
-                name: 'Sous-vide',
-                activities: ['Gea', 'Overpakken', 'Sleeven', 'Lossnijden', 'Schoonmaken', 'Overig']
-            },
-            'koelcel': {
-                name: 'Koelcel',
-                activities: ['Orderpicken', 'Overpakken', 'Voorraadopname', 'Schoonmaken', 'Herbewerken', 'Overig']
-            },
-            'fusthal': {
-                name: 'Fusthal',
-                activities: ['Wassen', 'Schoonmaken', 'Overig']
-            },
-            'puree': {
-                name: 'Puree',
-                activities: ['Produceren', 'Inpakken', 'Schoonmaken', 'Herbewerken', 'Overig']
-            }
-        };
-        
-        // Standaard werknemers
-        let employees = [
-            'Agnieszka', 'Aniel', 'Arkadiusz', 'Biniam', 'Biyik', 'Boa', 'Fred', 'Herman', 
-            'Kamila', 'Klaas', 'Magda', 'Mustafa', 'Okan', 'Paul', 'Paula', 'Rakesh', 
-            'Randhir', 'Rein', 'Roy', 'Samantha', 'Sen', 'Stefan', 'Willem-Jan', 'Wubbe',
-            'BDE Agniezka Ircha', 'BDE Amber', 'BDE Ewelina', 'BDE Jessica', 'BDE Krzystof',
-            'BDE Monika', 'BDE Patryk', 'BDE Paulina', 'BDE Saraela', 'BDE Uliana',
-            'BDE Yaroslav', 'BDE Mahmut', 'BDE Przemyslaw', 'BDE Ewa', 'BDE Man'
-        ];
-        
-        // Data opslag
-        let registrations = [];
-        let currentEmployee = null;
-        let currentWorkLine = null;
-        let multiWorkLineData = {}; // Houdt data van alle werklijnen bij
-
-        // Initialize Microsoft Authentication Library
-        async function initializeMSAL() {
-            try {
-                console.log('Initializing MSAL...');
-                msalInstance = new msal.PublicClientApplication(msalConfig);
-                await msalInstance.initialize();
-                console.log('MSAL initialized successfully');
-                await handleRedirectPromise();
-            } catch (error) {
-                console.error('MSAL initialization error:', error);
-            }
-        }
-
-        // Handle redirect response
-        async function handleRedirectPromise() {
-            try {
-                console.log('Handling redirect promise...');
-                const response = await msalInstance.handleRedirectPromise();
-                if (response) {
-                    console.log('Login response received:', response);
-                    account = response.account;
-                    updateUIForSignedInUser();
-                } else {
-                    console.log('No redirect response, checking existing accounts...');
-                    // Check if user is already signed in
-                    const accounts = msalInstance.getAllAccounts();
-                    console.log('Existing accounts:', accounts);
-                    if (accounts.length > 0) {
-                        account = accounts[0];
-                        updateUIForSignedInUser();
-                    }
-                }
-                updateAuthButtons();
-            } catch (error) {
-                console.error('Error handling redirect:', error);
-            }
-        }
-
-        // Sign in to Microsoft
-        async function signInToMicrosoft() {
-            try {
-                console.log('=== SIGN IN ATTEMPT ===');
-                console.log('Using redirect URI:', REDIRECT_URI);
-                showStatus('Inloggen bij Microsoft...', 'success');
-                
-                const loginRequestWithUri = {
-                    ...loginRequest,
-                    redirectUri: REDIRECT_URI
-                };
-                
-                console.log('Final login request:', JSON.stringify(loginRequestWithUri, null, 2));
-                
-                await msalInstance.loginRedirect(loginRequestWithUri);
-            } catch (error) {
-                console.error('Login error:', error);
-                showStatus('Fout bij inloggen: ' + error.message, 'error');
-            }
-        }
-
-        // Sign out
-        async function signOut() {
-            if (account) {
-                await msalInstance.logoutRedirect({
-                    account: account
-                });
-            }
-        }
-
-        // Get access token
-        async function getAccessToken() {
-            if (!account) {
-                throw new Error('Niet ingelogd');
-            }
-
-            const request = {
-                scopes: loginRequest.scopes,
-                account: account
-            };
-
-            try {
-                const response = await msalInstance.acquireTokenSilent(request);
-                return response.accessToken;
-            } catch (error) {
-                if (error instanceof msal.InteractionRequiredAuthError) {
-                    // Token expired, need to re-authenticate
-                    const response = await msalInstance.acquireTokenRedirect(request);
-                    return response.accessToken;
-                } else {
-                    throw error;
-                }
-            }
-        }
-
-        // Upload CSV to OneDrive
-        async function uploadCSVToOneDrive(csvContent, fileName) {
-            try {
-                if (!account) {
-                    showStatus('Eerst inloggen bij Microsoft vereist', 'error');
-                    return false;
-                }
-
-                showStatus('Uploaden naar OneDrive...', 'success');
-                
-                const accessToken = await getAccessToken();
-                
-                // Convert CSV string to blob
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                
-                // Upload to OneDrive root folder
-                const uploadUrl = 'https://graph.microsoft.com/v1.0/me/drive/root/children/' + fileName + '/content';
-                
-                const response = await fetch(uploadUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'text/csv'
-                    },
-                    body: blob
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    showStatus(`Bestand ${fileName} succesvol geüpload naar OneDrive!`, 'success');
-                    return true;
-                } else {
-                    const error = await response.text();
-                    console.error('Upload error:', error);
-                    showStatus('Fout bij uploaden: ' + response.statusText, 'error');
-                    return false;
-                }
-                
-            } catch (error) {
-                console.error('OneDrive upload error:', error);
-                showStatus('Fout bij uploaden naar OneDrive: ' + error.message, 'error');
-                return false;
-            }
-        }
-
-        // Update UI based on sign-in status
-        function updateUIForSignedInUser() {
-            if (account) {
-                // Update send button to show OneDrive option
-                updateSendButton();
-                showStatus(`Ingelogd als ${account.name || account.username}`, 'success');
-            }
-        }
-
-        // Update the send button to include OneDrive option
-        function updateSendButton() {
-            const sendButton = document.getElementById('send-data-btn');
-            if (sendButton && account) {
-                sendButton.textContent = 'Versturen naar OneDrive';
-                sendButton.onclick = sendDataToOneDrive;
-            }
-        }
-
-        // Update auth buttons based on login status
-        function updateAuthButtons() {
-            const signInBtn = document.getElementById('sign-in-btn');
-            const signOutBtn = document.getElementById('sign-out-btn');
-            const userInfo = document.getElementById('user-info');
-            
-            if (account) {
-                if (signInBtn) signInBtn.style.display = 'none';
-                if (signOutBtn) signOutBtn.style.display = 'block';
-                if (userInfo) userInfo.textContent = `Ingelogd: ${account.name || account.username}`;
-            } else {
-                if (signInBtn) signInBtn.style.display = 'block';
-                if (signOutBtn) signOutBtn.style.display = 'none';
-                if (userInfo) userInfo.textContent = '';
-            }
-        }
-
-        // Modified sendData function for OneDrive
-        async function sendDataToOneDrive() {
-            if (!registrations || registrations.length === 0) {
-                showStatus('Geen gegevens om te versturen', 'error');
-                return;
-            }
-            
-            if (!account) {
-                showStatus('Eerst inloggen bij Microsoft', 'error');
-                await signInToMicrosoft();
-                return;
-            }
-            
-            // Get new registrations (same logic as original sendData)
-            const lastSentDate = localStorage.getItem('sousvide_last_sent') || '2000-01-01';
-            const newRegistrations = registrations.filter(reg => 
-                reg.date > lastSentDate || 
-                (reg.date === lastSentDate && !isRegistrationSent(reg))
-            );
-            
-            if (newRegistrations.length === 0) {
-                const removedCount = cleanupOldData();
-                if (removedCount > 0) {
-                    showStatus(`Alle gegevens zijn al verzonden. ${removedCount} oude registraties opgeruimd.`, 'success');
-                } else {
-                    showStatus('Alle gegevens zijn al verzonden', 'error');
-                }
-                return;
-            }
-            
-            // Create CSV content (same as original)
-            let csvContent = 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n';
-            
-            newRegistrations.forEach(reg => {
-                if (reg.hours && typeof reg.hours === 'object') {
-                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                            Object.entries(activities).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
-                            });
-                        });
-                    } else {
-                        Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            csvContent += `${reg.employee || 'Onbekend'},${reg.workLineName || 'Onbekend'},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
-                        });
-                    }
-                }
-            });
-            
-            if (csvContent === 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n') {
-                showStatus('Geen geldige gegevens om te versturen', 'error');
-                return;
-            }
-            
-            // Upload to OneDrive instead of downloading
-            const now = new Date();
-            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
-            const fileName = `tijdregistratie_versturen_${timestamp}.csv`;
-            
-            const success = await uploadCSVToOneDrive(csvContent, fileName);
-            
-            if (success) {
-                // Mark as sent and cleanup (same as original)
-                markRegistrationsAsSent(newRegistrations);
-                const today = new Date().toISOString().split('T')[0];
-                localStorage.setItem('sousvide_last_sent', today);
-                
-                const removedCount = cleanupOldData();
-                let statusMessage = `${newRegistrations.length} nieuwe registraties naar OneDrive verzonden!`;
-                if (removedCount > 0) {
-                    statusMessage += ` ${removedCount} oude registraties opgeruimd.`;
-                }
-                
-                showStatus(statusMessage, 'success');
-                updateDataPreview();
-            }
-        }
-
-        // Modal functies
-        function openEmployeeModal() {
-            document.getElementById('employee-modal').classList.add('show');
-        }
-
-        function closeEmployeeModal() {
-            document.getElementById('employee-modal').classList.remove('show');
-        }
-
-        // Klik buiten modal om te sluiten
-        window.onclick = function(event) {
-            const modal = document.getElementById('employee-modal');
-            if (event.target === modal) {
-                closeEmployeeModal();
-            }
-        }
-
-        // Data management toggle
-        function toggleDataManagement() {
-            const managementEl = document.getElementById('data-management');
-            const btnEl = event.target;
-            
-            if (managementEl.classList.contains('hidden')) {
-                managementEl.classList.remove('hidden');
-                btnEl.textContent = 'Verberg opties';
-            } else {
-                managementEl.classList.add('hidden');
-                btnEl.textContent = 'Beheer opties';
-            }
-        }
-
-        // Werknemers laden en opslaan
-        function loadEmployees() {
-            const savedEmployees = localStorage.getItem('sousvide_employees');
-            if (savedEmployees) {
-                employees = JSON.parse(savedEmployees);
-            }
-            updateEmployeeList();
-            updateEmployeeGrid();
-        }
-
-        function saveEmployees() {
-            localStorage.setItem('sousvide_employees', JSON.stringify(employees));
-        }
-
-        // Werknemerslijst updaten
-        function updateEmployeeList() {
-            const listEl = document.getElementById('employee-list');
-            listEl.innerHTML = '';
-            
-            employees.forEach(employee => {
-                const item = document.createElement('div');
-                item.className = 'employee-item';
-                item.innerHTML = `
-                    <span>${employee}</span>
-                    <button class="btn-remove" onclick="removeEmployee('${employee}')">Verwijder</button>
-                `;
-                listEl.appendChild(item);
-            });
-        }
-
-        // Werknemers grid updaten
-        function updateEmployeeGrid() {
-            const gridEl = document.getElementById('employee-grid');
-            gridEl.innerHTML = '';
-            
-            employees.forEach(employee => {
-                const btn = document.createElement('button');
-                btn.className = 'employee-btn';
-                btn.textContent = employee;
-                btn.onclick = () => selectEmployee(employee);
-                gridEl.appendChild(btn);
-            });
-        }
-
-        // Werknemer toevoegen
-        function addEmployee() {
-            const nameInput = document.getElementById('new-employee-name');
-            const name = nameInput.value.trim();
-            
-            if (!name) {
-                showStatus('Voer een naam in', 'error');
-                return;
-            }
-            
-            if (employees.includes(name)) {
-                showStatus('Deze werknemer bestaat al', 'error');
-                return;
-            }
-            
-            employees.push(name);
-            employees.sort();
-            saveEmployees();
-            updateEmployeeList();
-            updateEmployeeGrid();
-            
-            nameInput.value = '';
-            showStatus(`${name} toegevoegd`, 'success');
-        }
-
-        // Werknemer verwijderen
-        function removeEmployee(name) {
-            if (confirm(`Weet je zeker dat je ${name} wilt verwijderen?`)) {
-                employees = employees.filter(emp => emp !== name);
-                saveEmployees();
-                updateEmployeeList();
-                updateEmployeeGrid();
-                showStatus(`${name} verwijderd`, 'success');
-            }
-        }
-
-        // Werknemer selecteren
-        function selectEmployee(name) {
-            document.querySelectorAll('#employee-grid .employee-btn').forEach(btn => btn.classList.remove('selected'));
-            event.target.classList.add('selected');
-            currentEmployee = name;
-            currentWorkLine = null;
-            multiWorkLineData = {};
-            
-            document.getElementById('workline-selection').classList.remove('hidden');
-            document.getElementById('hours-registration').classList.add('hidden');
-            document.getElementById('total-overview').classList.add('hidden');
-            
-            // Reset werklijnselectie
-            document.querySelectorAll('#workline-grid .workline-btn').forEach(btn => btn.classList.remove('selected'));
-        }
-
-        // Werklijn selecteren (met automatisch opslaan van vorige)
-        function selectWorkLine(workLineKey) {
-            console.log('selectWorkLine called:', workLineKey);
-            
-            // Sla huidige data op als er al een werklijn actief was
-            if (currentWorkLine) {
-                saveCurrentWorkLineData();
-            }
-            
-            // Wissel naar nieuwe werklijn
-            document.querySelectorAll('#workline-grid .workline-btn').forEach(btn => btn.classList.remove('selected'));
-            event.target.classList.add('selected');
-            currentWorkLine = workLineKey;
-            
-            const workLine = workLines[workLineKey];
-            document.getElementById('hours-registration').classList.remove('hidden');
-            document.getElementById('total-overview').classList.remove('hidden');
-            
-            generateActivitiesTable(workLine.activities);
-            loadWorkLineData(workLineKey);
-            updateTotalOverview();
-        }
-
-        // Sla huidige werklijn data op
-        function saveCurrentWorkLineData() {
-            if (!currentWorkLine) return;
-            
-            const activities = workLines[currentWorkLine].activities;
-            const workLineData = {};
-            
-            activities.forEach(activity => {
-                const inputId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
-                const input = document.getElementById(inputId);
-                if (input && input.value && input.value !== '0') {
-                    const hours = parseFloat(input.value);
-                    if (hours > 0) {
-                        // Check if this is an "Overig" activity and get description
-                        let activityName = activity;
-                        if (activity.toLowerCase() === 'overig') {
-                            const descriptionInput = document.getElementById(inputId + '-description');
-                            if (descriptionInput && descriptionInput.value.trim()) {
-                                activityName = `Overig: ${descriptionInput.value.trim()}`;
-                            }
-                        }
-                        workLineData[activityName] = hours;
-                    }
-                }
-            });
-            
-            if (Object.keys(workLineData).length > 0) {
-                multiWorkLineData[currentWorkLine] = workLineData;
-            } else {
-                delete multiWorkLineData[currentWorkLine];
-            }
-        }
-
-        // Laad werklijn data
-        function loadWorkLineData(workLineKey) {
-            const activities = workLines[workLineKey].activities;
-            
-            activities.forEach(activity => {
-                const inputId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
-                const input = document.getElementById(inputId);
-                if (input) {
-                    // Check for saved data that might include description for "Overig"
-                    let savedHours = 0;
-                    let savedDescription = '';
-                    
-                    if (multiWorkLineData[workLineKey]) {
-                        // First check for exact match
-                        if (multiWorkLineData[workLineKey][activity]) {
-                            savedHours = multiWorkLineData[workLineKey][activity];
-                        } else if (activity.toLowerCase() === 'overig') {
-                            // For "Overig", check for entries that start with "Overig:"
-                            for (let key in multiWorkLineData[workLineKey]) {
-                                if (key.startsWith('Overig:')) {
-                                    savedHours = multiWorkLineData[workLineKey][key];
-                                    savedDescription = key.substring(7).trim(); // Remove "Overig: "
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    
-                    input.value = savedHours;
-                    
-                    // Set description for "Overig" if available
-                    if (activity.toLowerCase() === 'overig' && savedDescription) {
-                        const descriptionInput = document.getElementById(inputId + '-description');
-                        if (descriptionInput) {
-                            descriptionInput.value = savedDescription;
-                        }
-                    }
-                }
-            });
-        }
-
-        // Update totaal overzicht van alle werklijnen
-        function updateTotalOverview() {
-            const overviewEl = document.getElementById('total-overview');
-            const totalsEl = document.getElementById('workline-totals');
-            
-            // Sla eerst huidige data op
-            if (currentWorkLine) {
-                saveCurrentWorkLineData();
-            }
-            
-            // Clear existing content
-            totalsEl.innerHTML = '';
-            
-            let grandTotal = 0;
-            
-            // Toon alle werklijnen met data
-            Object.entries(multiWorkLineData).forEach(([workLineKey, activities]) => {
-                const workLineName = workLines[workLineKey].name;
-                const workLineTotal = Object.values(activities).reduce((sum, hours) => sum + hours, 0);
-                grandTotal += workLineTotal;
-                
-                const workLineDiv = document.createElement('div');
-                workLineDiv.className = 'workline-total';
-                workLineDiv.innerHTML = `
-                    <div class="name">${workLineName}</div>
-                    <div class="hours">${workLineTotal.toFixed(2)}u</div>
-                `;
-                totalsEl.appendChild(workLineDiv);
-            });
-            
-            // Voeg grand total toe (altijd tonen)
-            const grandTotalDiv = document.createElement('div');
-            grandTotalDiv.className = grandTotal > 8 ? 'grand-total warning' : 'grand-total';
-            grandTotalDiv.innerHTML = `
-                <div class="name">TOTAAL</div>
-                <div class="hours">${grandTotal.toFixed(2)}u</div>
-            `;
-            totalsEl.appendChild(grandTotalDiv);
-            
-            // Toon overzicht altijd als er een werklijn geselecteerd is
-            if (currentWorkLine) {
-                overviewEl.classList.remove('hidden');
-            } else {
-                overviewEl.classList.add('hidden');
-            }
-        }
-
-        // Activiteiten tabel genereren
-        function generateActivitiesTable(activities) {
-            const tbody = document.getElementById('activities-tbody');
-            tbody.innerHTML = '';
-            
-            activities.forEach(activity => {
-                const activityId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
-                const row = document.createElement('tr');
-                
-                // Check if this is an "Overig" activity to replace with input field
-                const isOverig = activity.toLowerCase() === 'overig';
-                const activityDisplay = isOverig ? 
-                    `<input type="text" placeholder="Overig, Namelijk:" id="${activityId}-description" 
-                     class="overig-description">` : 
-                    activity;
-                
-                row.innerHTML = `
-                    <td>${activityDisplay}</td>
-                    <td>
-                        <div class="hour-controls">
-                            <button class="btn-fullday" onclick="setFullDay('${activityId}')">Hele dag</button>
-                            <div class="hour-buttons-group">
-                                <button class="hour-btn minus" onclick="changeHours('${activityId}', -1)">-1</button>
-                                <button class="hour-btn minus" onclick="changeHours('${activityId}', -0.25)">-0,25</button>
-                                <input type="number" class="hour-input" id="${activityId}" min="0" max="12" step="0.25" value="0" readonly>
-                                <button class="hour-btn plus" onclick="changeHours('${activityId}', 0.25)">+0,25</button>
-                                <button class="hour-btn plus" onclick="changeHours('${activityId}', 1)">+1</button>
-                                <button class="hour-btn plus" onclick="changeHours('${activityId}', 4)">+4</button>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <button class="btn-clear" onclick="clearHours('${activityId}')">Wis</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Uren wijzigen met +/- knoppen
-        function changeHours(inputId, change) {
-            const input = document.getElementById(inputId);
-            const currentValue = parseFloat(input.value) || 0;
-            const newValue = Math.max(0, Math.min(12, currentValue + change));
-            input.value = newValue;
-            updateTotalOverview();
-        }
-
-        // Hele dag instellen voor specifieke activiteit (7.5 uur)
-        function setFullDay(inputId) {
-            clearAllHours();
-            document.getElementById(inputId).value = '7.5';
-            updateTotalOverview();
-        }
-
-        // Uren wissen voor specifieke activiteit
-        function clearHours(inputId) {
-            document.getElementById(inputId).value = '0';
-            updateTotalOverview();
-        }
-
-        // Alle uren wissen
-        function clearAllHours() {
-            if (!currentWorkLine) return;
-            
-            const activities = workLines[currentWorkLine].activities;
-            activities.forEach(activity => {
-                const inputId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
-                const input = document.getElementById(inputId);
-                if (input) {
-                    input.value = '0';
-                }
-            });
-        }
-
-        // Registratie opslaan (alle afdelingen tegelijk)
-        function saveRegistration() {
-            if (!currentEmployee) return;
-            
-            // Sla eerst huidige werklijn data op
-            saveCurrentWorkLineData();
-            
-            if (Object.keys(multiWorkLineData).length === 0) {
-                showStatus('Voer minimaal één activiteit in', 'error');
-                return;
-            }
-            
-            // Bereken totaal van alle uren
-            let totalHours = 0;
-            const workLineNames = [];
-            
-            Object.entries(multiWorkLineData).forEach(([workLineKey, activities]) => {
-                workLineNames.push(workLines[workLineKey].name);
-                Object.values(activities).forEach(hours => {
-                    totalHours += hours;
-                });
-            });
-            
-            const registration = {
-                employee: currentEmployee,
-                workLineNames: workLineNames,
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
-                hours: multiWorkLineData,
-                total: totalHours
-            };
-            
-            registrations.unshift(registration);
-            localStorage.setItem('sousvide_registrations', JSON.stringify(registrations));
-            
-            showStatus(`Registratie voor ${currentEmployee} (${workLineNames.join(' + ')}) opgeslagen! Totaal: ${totalHours.toFixed(2)} uren`, 'success');
-            
-            resetSelection();
-            updateDataPreview();
-        }
-
-        // Selectie resetten
-        function resetSelection() {
-            currentEmployee = null;
-            currentWorkLine = null;
-            multiWorkLineData = {};
-            document.querySelectorAll('.employee-btn').forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('workline-selection').classList.add('hidden');
-            document.getElementById('hours-registration').classList.add('hidden');
-            document.getElementById('total-overview').classList.add('hidden');
-        }
-
-        // Status bericht tonen
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('status-message');
-            statusEl.textContent = message;
-            statusEl.className = `status ${type}`;
-            
-            setTimeout(() => {
-                statusEl.textContent = '';
-                statusEl.className = '';
-            }, 4000);
-        }
-
-        // Data preview updaten (per afdeling in aparte vakken)
-        function updateDataPreview() {
-            // Reset alle department previews
-            const departments = ['schillijn', 'inpakken', 'sousvide', 'koelcel', 'fusthal', 'puree'];
-            departments.forEach(dept => {
-                const preview = document.getElementById(`${dept}-preview`);
-                if (preview) preview.textContent = 'Nog geen registraties';
-            });
-            
-            if (!registrations || registrations.length === 0) {
-                return;
-            }
-            
-            const sortedRegistrations = [...registrations].sort((a, b) => {
-                const dateCompare = new Date(b.date) - new Date(a.date);
-                if (dateCompare !== 0) return dateCompare;
-                
-                const timeA = a.time || '00:00';
-                const timeB = b.time || '00:00';
-                return timeB.localeCompare(timeA);
-            });
-            
-            // Groepeer per afdeling
-            const departmentData = {
-                schillijn: [],
-                inpakken: [],
-                sousvide: [],
-                koelcel: [],
-                fusthal: [],
-                puree: []
-            };
-            
-            sortedRegistrations.forEach(reg => {
-                if (!reg.hours) return;
-                
-                if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                    // Nieuwe format (object met werklijnen als keys)
-                    Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                        if (departmentData[workLineKey]) {
-                            Object.entries(activities).forEach(([activity, hours]) => {
-                                departmentData[workLineKey].push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
-                            });
-                        }
-                    });
-                } else if (reg.workLineName) {
-                    // Enkele werklijn format - zoek de workLineKey
-                    const workLineKey = Object.keys(workLines).find(key => workLines[key].name === reg.workLineName);
-                    if (workLineKey && departmentData[workLineKey]) {
-                        Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            departmentData[workLineKey].push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
-                        });
-                    }
-                } else {
-                    // Oude format - probeer te raden op basis van activiteiten (fallback)
-                    Object.entries(reg.hours).forEach(([activity, hours]) => {
-                        // Voeg toe aan 'onbekend' of eerste afdeling als fallback
-                        if (departmentData.schillijn) {
-                            departmentData.schillijn.push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
-                        }
-                    });
-                }
-            });
-            
-            // Update elke afdeling preview
-            Object.entries(departmentData).forEach(([deptKey, lines]) => {
-                const preview = document.getElementById(`${deptKey}-preview`);
-                if (preview) {
-                    if (lines.length > 0) {
-                        preview.textContent = lines.join('\n');
-                    } else {
-                        preview.textContent = 'Nog geen registraties';
-                    }
-                }
-            });
-        }
-
-        // Gegevens versturen (fallback voor als OneDrive niet beschikbaar is)
-        function sendData() {
-            if (account) {
-                sendDataToOneDrive();
-                return;
-            }
-            
-            if (!registrations || registrations.length === 0) {
-                showStatus('Geen gegevens om te versturen', 'error');
-                return;
-            }
-            
-            // Haal de laatste verzenddatum op
-            const lastSentDate = localStorage.getItem('sousvide_last_sent') || '2000-01-01';
-            
-            // Filter alleen nieuwe gegevens (nog niet verzonden)
-            const newRegistrations = registrations.filter(reg => 
-                reg.date > lastSentDate || 
-                (reg.date === lastSentDate && !isRegistrationSent(reg))
-            );
-            
-            if (newRegistrations.length === 0) {
-                // Ruim oude data op, ook als er niets te versturen is
-                const removedCount = cleanupOldData();
-                if (removedCount > 0) {
-                    showStatus(`Alle gegevens zijn al verzonden. ${removedCount} oude registraties opgeruimd (ouder dan 35 dagen).`, 'success');
-                } else {
-                    showStatus('Alle gegevens zijn al verzonden', 'error');
-                }
-                return;
-            }
-            
-            // Maak CSV van nieuwe gegevens
-            let csvContent = 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n';
-            
-            newRegistrations.forEach(reg => {
-                if (reg.hours && typeof reg.hours === 'object') {
-                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                        // Nieuwe format (object met werklijnen als keys)
-                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                            Object.entries(activities).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
-                            });
-                        });
-                    } else {
-                        // Oude format (direct activities)
-                        Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            csvContent += `${reg.employee || 'Onbekend'},${reg.workLineName || 'Onbekend'},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
-                        });
-                    }
-                }
-            });
-            
-            if (csvContent === 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n') {
-                showStatus('Geen geldige gegevens om te versturen', 'error');
-                return;
-            }
-            
-            // Download de CSV
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const now = new Date();
-            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
-            link.setAttribute('href', url);
-            link.setAttribute('download', `tijdregistratie_versturen_${timestamp}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Markeer als verzonden
-            markRegistrationsAsSent(newRegistrations);
-            
-            // Update laatste verzenddatum
-            const today = new Date().toISOString().split('T')[0];
-            localStorage.setItem('sousvide_last_sent', today);
-            
-            // Ruim oude data op na het versturen
-            const removedCount = cleanupOldData();
-            
-            let statusMessage = `${newRegistrations.length} nieuwe registraties verzonden!`;
-            if (removedCount > 0) {
-                statusMessage += ` ${removedCount} oude registraties opgeruimd (ouder dan 35 dagen).`;
-            }
-            
-            showStatus(statusMessage, 'success');
-            updateDataPreview();
-        }
-        
-        // Check of registratie al verzonden is
-        function isRegistrationSent(registration) {
-            const sentRegistrations = JSON.parse(localStorage.getItem('sousvide_sent_registrations') || '[]');
-            const regId = `${registration.employee}_${registration.date}_${registration.time}`;
-            return sentRegistrations.includes(regId);
-        }
-        
-        // Markeer registraties als verzonden
-        function markRegistrationsAsSent(registrations) {
-            const sentRegistrations = JSON.parse(localStorage.getItem('sousvide_sent_registrations') || '[]');
-            
-            registrations.forEach(reg => {
-                const regId = `${reg.employee}_${reg.date}_${reg.time}`;
-                if (!sentRegistrations.includes(regId)) {
-                    sentRegistrations.push(regId);
-                }
-            });
-            
-            localStorage.setItem('sousvide_sent_registrations', JSON.stringify(sentRegistrations));
-        }
-
-        // CSV downloaden (alle data)
-        function downloadCSV() {
-            if (!registrations || registrations.length === 0) {
-                showStatus('Geen data om te downloaden', 'error');
-                return;
-            }
-            
-            let csvContent = 'Werknemer,Afdeling,Datum,Activiteit,Uren\n';
-            
-            registrations.forEach(reg => {
-                if (reg.hours && typeof reg.hours === 'object') {
-                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                        // Nieuwe format (object met werklijnen als keys)
-                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                            Object.entries(activities).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${activity},${hours}\n`;
-                            });
-                        });
-                    } else {
-                        // Oude format (direct activities)
-                        Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            csvContent += `${reg.employee || 'Onbekend'},${reg.workLineName || 'Onbekend'},${reg.date || 'Onbekend'},${activity},${hours}\n`;
-                        });
-                    }
-                }
-            });
-            
-            if (csvContent === 'Werknemer,Afdeling,Datum,Activiteit,Uren\n') {
-                showStatus('Geen geldige data om te downloaden', 'error');
-                return;
-            }
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const now = new Date();
-            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
-            link.setAttribute('href', url);
-            link.setAttribute('download', `tijdregistratie_${timestamp}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showStatus('CSV gedownload!', 'success');
-        }
-
-        function clearAllData() {
-            if (confirm('Weet je zeker dat je alle registraties wilt wissen?')) {
-                registrations = [];
-                localStorage.removeItem('sousvide_registrations');
-                localStorage.removeItem('sousvide_sent_registrations');
-                updateDataPreview();
-                showStatus('Alle data gewist', 'success');
-            }
-        }
-
-        // Automatische dagelijkse export om 03:00
-        function scheduleAutoExport() {
-            const now = new Date();
-            const target = new Date();
-            target.setHours(3, 0, 0, 0);
-            
-            if (now > target) {
-                target.setDate(target.getDate() + 1);
-            }
-            
-            const timeUntilTarget = target.getTime() - now.getTime();
-            
-            setTimeout(() => {
-                exportYesterdayData();
-                setInterval(exportYesterdayData, 24 * 60 * 60 * 1000);
-            }, timeUntilTarget);
-            
-            console.log(`Automatische export gepland voor: ${target.toLocaleString()}`);
-        }
-
-        // Export data van gisteren en opruimen oude data
-        function exportYesterdayData() {
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
-            
-            const yesterdayRegistrations = registrations.filter(reg => reg.date === yesterdayStr);
-            
-            if (yesterdayRegistrations.length === 0) {
-                console.log('Geen registraties van gisteren om te exporteren');
-            } else {
-                let csvContent = 'Werknemer,Afdeling,Datum,Activiteit,Uren\n';
-                yesterdayRegistrations.forEach(reg => {
-                    if (reg.hours && typeof reg.hours === 'object') {
-                        if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                            // Nieuwe format (object met werklijnen als keys)
-                            Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                                const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                                Object.entries(activities).forEach(([activity, hours]) => {
-                                    csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${activity},${hours}\n`;
-                                });
-                            });
-                        } else {
-                            // Oude format (direct activities)
-                            Object.entries(reg.hours).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'},${reg.workLineName || 'Onbekend'},${reg.date || 'Onbekend'},${activity},${hours}\n`;
-                            });
-                        }
-                    }
-                });
-                
-                downloadCSVContent(csvContent, `tijdregistratie_auto_${yesterdayStr}.csv`);
-                console.log(`Automatische export voltooid voor ${yesterdayStr}`);
-            }
-            
-            cleanupOldData();
-        }
-
-        // Ruim data ouder dan 35 dagen op
-        function cleanupOldData() {
-            const thirtyFiveDaysAgo = new Date();
-            thirtyFiveDaysAgo.setDate(thirtyFiveDaysAgo.getDate() - 35);
-            const cutoffDate = thirtyFiveDaysAgo.toISOString().split('T')[0];
-            
-            const originalCount = registrations.length;
-            registrations = registrations.filter(reg => reg.date >= cutoffDate);
-            const removedCount = originalCount - registrations.length;
-            
-            if (removedCount > 0) {
-                localStorage.setItem('sousvide_registrations', JSON.stringify(registrations));
-                updateDataPreview();
-                console.log(`${removedCount} oude registraties opgeruimd (ouder dan ${cutoffDate})`);
-                return removedCount;
-            }
-            return 0;
-        }
-
-        // Helper functie voor CSV download
-        function downloadCSVContent(csvContent, fileName) {
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', fileName);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Data laden bij opstarten
-        function loadData() {
-            try {
-                const savedData = localStorage.getItem('sousvide_registrations');
-                if (savedData) {
-                    registrations = JSON.parse(savedData);
-                    if (!Array.isArray(registrations)) {
-                        registrations = [];
-                    }
-                    updateDataPreview();
-                }
-            } catch (error) {
-                console.error('Fout bij laden data:', error);
-                registrations = [];
-                localStorage.removeItem('sousvide_registrations');
-            }
-        }
-
-        // Enter key support en initialisatie
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, starting initialization...');
-            
-            const nameInput = document.getElementById('new-employee-name');
-            if (nameInput) {
-                nameInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        addEmployee();
-                    }
-                });
-            }
-            
-            loadEmployees();
-            loadData();
-            scheduleAutoExport();
-            
-            // Start MSAL initialization
-            console.log('Starting MSAL initialization...');
-            initializeMSAL();
-        });
-    </script>
-</body>
-</html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
@@ -1170,39 +52,55 @@
             flex-wrap: wrap;
         }
 
-        .btn-manage {
+        /* Uniforme knoppen voor beheer opties */
+        .btn-uniform {
             background: #6c757d;
             color: white;
-            padding: 14px 28px;
+            padding: 16px 24px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.1em;
             font-weight: 500;
             transition: all 0.2s;
-            min-height: 48px;
+            min-height: 50px;
+            min-width: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .btn-manage:hover {
+        .btn-uniform:hover {
             background: #5a6268;
             transform: translateY(-1px);
         }
 
+        .btn-uniform.btn-orange {
+            background: #FF9800;
+        }
+
+        .btn-uniform.btn-orange:hover {
+            background: #F57C00;
+        }
+
         .btn-auth {
-            background: #0078d4;
-            color: white;
-            padding: 10px 20px;
+            background: #fed500;
+            color: #1a1a1a;
+            padding: 16px 32px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 500;
+            font-size: 1.1em;
+            font-weight: 600;
             transition: all 0.2s;
-            min-height: 40px;
+            min-height: 48px;
+            box-shadow: 0 2px 8px rgba(254,213,0,0.3);
         }
 
         .btn-auth:hover {
-            background: #106ebe;
+            background: #e6c200;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(254,213,0,0.4);
         }
 
         .btn-auth.sign-out {
@@ -1215,8 +113,9 @@
 
         .user-info {
             color: #666;
-            font-size: 0.9em;
-            margin-left: 10px;
+            font-size: 1em;
+            margin-right: 15px;
+            font-weight: 500;
         }
 
         .modal {
@@ -1885,7 +784,7 @@
             }
             
             .workline-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
             
             .departments-row {
@@ -1918,7 +817,7 @@
             }
             
             .workline-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .departments-row {
@@ -1961,15 +860,14 @@
         <div class="header">
             <h1>Tijdregistratie</h1>
             <div class="header-buttons">
-                <button class="btn-manage" onclick="openEmployeeModal()">Beheer werknemers</button>
                 <div id="auth-buttons">
+                    <span id="user-info" class="user-info"></span>
                     <button id="sign-in-btn" class="btn-auth" onclick="signInToMicrosoft()">
                         Inloggen Microsoft
                     </button>
                     <button id="sign-out-btn" class="btn-auth sign-out" onclick="signOut()" style="display: none;">
                         Uitloggen
                     </button>
-                    <span id="user-info" class="user-info"></span>
                 </div>
             </div>
         </div>
@@ -2094,12 +992,13 @@
             
             <div class="controls">
                 <button class="btn-manage" onclick="toggleDataManagement()">Beheer opties</button>
-                <button id="send-data-btn" class="btn btn-download" onclick="sendData()">Gegevens versturen</button>
             </div>
             
             <div class="hidden" id="data-management">
-                <div class="controls" style="margin-top: 15px;">
-                    <button class="btn btn-download" onclick="downloadCSV()">Download alle CSV</button>
+                <div class="controls" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn-uniform" onclick="openEmployeeModal()">Beheer werknemers</button>
+                    <button id="send-data-btn" class="btn-uniform btn-orange" onclick="sendData()">Gegevens versturen</button>
+                    <button class="btn-uniform btn-orange" onclick="downloadCSV()">Download alle CSV</button>
                 </div>
             </div>
         </div>
@@ -2110,5 +1009,1330 @@
         // BELANGRIJKE DEBUG: FORCEER CORRECTE REDIRECT URI
         console.log('=== MSAL CONFIG DEBUG ===');
         
-        // Microsoft Graph API configuratie - VOLLEDIG OPNIEUW
-        const
+        // Microsoft Graph API configuratie - gebruik HTTPS localhost
+        const REDIRECT_URI = 'https://sh-online.github.io/tijdregistratie/';
+        console.log('Using redirect URI:', REDIRECT_URI);
+        
+        const msalConfig = {
+            auth: {
+                clientId: 'b6bac90f-29af-4137-a5f0-be4387796f56',
+                authority: 'https://login.microsoftonline.com/common',
+                redirectUri: REDIRECT_URI
+            },
+            cache: {
+                cacheLocation: 'localStorage',
+                storeAuthStateInCookie: false
+            }
+        };
+
+        console.log('MSAL Config:', JSON.stringify(msalConfig, null, 2));
+
+        // Graph API scopes voor OneDrive
+        const loginRequest = {
+            scopes: ['Files.ReadWrite', 'User.Read'],
+            redirectUri: REDIRECT_URI  // Ook hier expliciet zetten
+        };
+
+        console.log('Login Request:', JSON.stringify(loginRequest, null, 2));
+
+        // Initialize MSAL
+        let msalInstance;
+        let account = null;
+
+        // Configuratie voor verschillende werklijnen
+        const workLines = {
+            'schillijn': {
+                name: 'Schillijn',
+                activities: ['Produceren', 'Lezen', 'Sous-vide', 'Herbewerken', 'Schoonmaken', 'Overig']
+            },
+            'inpakken': {
+                name: 'Inpakken', 
+                activities: ['Produceren', 'Kratten', 'Herbewerken', 'Schoonmaken', 'Overig']
+            },
+            'sousvide': {
+                name: 'Sous-vide',
+                activities: ['Gea', 'Overpakken', 'Sleeven', 'Lossnijden', 'Schoonmaken', 'Overig']
+            },
+            'koelcel': {
+                name: 'Koelcel',
+                activities: ['Orderpicken', 'Overpakken', 'Voorraadopname', 'Schoonmaken', 'Herbewerken', 'Overig']
+            },
+            'fusthal': {
+                name: 'Fusthal',
+                activities: ['Wassen', 'Schoonmaken', 'Overig']
+            },
+            'puree': {
+                name: 'Puree',
+                activities: ['Produceren', 'Inpakken', 'Schoonmaken', 'Herbewerken', 'Overig']
+            }
+        };
+        
+        // Standaard werknemers
+        let employees = [
+            'Agnieszka', 'Aniel', 'Arkadiusz', 'Biniam', 'Biyik', 'Boa', 'Fred', 'Herman', 
+            'Kamila', 'Klaas', 'Magda', 'Mustafa', 'Okan', 'Paul', 'Paula', 'Rakesh', 
+            'Randhir', 'Rein', 'Roy', 'Samantha', 'Sen', 'Stefan', 'Willem-Jan', 'Wubbe',
+            'BDE Agniezka Ircha', 'BDE Amber', 'BDE Ewelina', 'BDE Jessica', 'BDE Krzystof',
+            'BDE Monika', 'BDE Patryk', 'BDE Paulina', 'BDE Saraela', 'BDE Uliana',
+            'BDE Yaroslav', 'BDE Mahmut', 'BDE Przemyslaw', 'BDE Ewa', 'BDE Man'
+        ];
+        
+        // Data opslag
+        let registrations = [];
+        let currentEmployee = null;
+        let currentWorkLine = null;
+        let multiWorkLineData = {}; // Houdt data van alle werklijnen bij
+
+        // Initialize Microsoft Authentication Library
+        async function initializeMSAL() {
+            try {
+                console.log('Initializing MSAL...');
+                msalInstance = new msal.PublicClientApplication(msalConfig);
+                await msalInstance.initialize();
+                console.log('MSAL initialized successfully');
+                await handleRedirectPromise();
+            } catch (error) {
+                console.error('MSAL initialization error:', error);
+            }
+        }
+
+        // Handle redirect response
+        async function handleRedirectPromise() {
+            try {
+                console.log('Handling redirect promise...');
+                const response = await msalInstance.handleRedirectPromise();
+                if (response) {
+                    console.log('Login response received:', response);
+                    account = response.account;
+                    updateUIForSignedInUser();
+                } else {
+                    console.log('No redirect response, checking existing accounts...');
+                    // Check if user is already signed in
+                    const accounts = msalInstance.getAllAccounts();
+                    console.log('Existing accounts:', accounts);
+                    if (accounts.length > 0) {
+                        account = accounts[0];
+                        updateUIForSignedInUser();
+                    }
+                }
+                updateAuthButtons();
+            } catch (error) {
+                console.error('Error handling redirect:', error);
+            }
+        }
+
+        // Sign in to Microsoft
+        async function signInToMicrosoft() {
+            try {
+                console.log('=== SIGN IN ATTEMPT ===');
+                console.log('Using redirect URI:', REDIRECT_URI);
+                showStatus('Inloggen bij Microsoft...', 'success');
+                
+                const loginRequestWithUri = {
+                    ...loginRequest,
+                    redirectUri: REDIRECT_URI
+                };
+                
+                console.log('Final login request:', JSON.stringify(loginRequestWithUri, null, 2));
+                
+                await msalInstance.loginRedirect(loginRequestWithUri);
+            } catch (error) {
+                console.error('Login error:', error);
+                showStatus('Fout bij inloggen: ' + error.message, 'error');
+            }
+        }
+
+        // Sign out
+        async function signOut() {
+            if (account) {
+                await msalInstance.logoutRedirect({
+                    account: account
+                });
+            }
+        }
+
+        // Get access token
+        async function getAccessToken() {
+            if (!account) {
+                throw new Error('Niet ingelogd');
+            }
+
+            const request = {
+                scopes: loginRequest.scopes,
+                account: account
+            };
+
+            try {
+                const response = await msalInstance.acquireTokenSilent(request);
+                return response.accessToken;
+            } catch (error) {
+                if (error instanceof msal.InteractionRequiredAuthError) {
+                    // Token expired, need to re-authenticate
+                    const response = await msalInstance.acquireTokenRedirect(request);
+                    return response.accessToken;
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        // Upload CSV to OneDrive
+        async function uploadCSVToOneDrive(csvContent, fileName) {
+            try {
+                if (!account) {
+                    showStatus('Eerst inloggen bij Microsoft vereist', 'error');
+                    return false;
+                }
+
+                showStatus('Uploaden naar OneDrive...', 'success');
+                
+                const accessToken = await getAccessToken();
+                
+                // Convert CSV string to blob
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                
+                // Upload to OneDrive root folder
+                const uploadUrl = 'https://graph.microsoft.com/v1.0/me/drive/root/children/' + fileName + '/content';
+                
+                const response = await fetch(uploadUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'text/csv'
+                    },
+                    body: blob
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showStatus(`Bestand ${fileName} succesvol geüpload naar OneDrive!`, 'success');
+                    return true;
+                } else {
+                    const error = await response.text();
+                    console.error('Upload error:', error);
+                    showStatus('Fout bij uploaden: ' + response.statusText, 'error');
+                    return false;
+                }
+                
+            } catch (error) {
+                console.error('OneDrive upload error:', error);
+                showStatus('Fout bij uploaden naar OneDrive: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        // ====== NIEUWE SMART UPLOAD FUNCTIONALITEIT ======
+
+        // Helper functie: krijg alle nog niet verzonden registraties
+        function getUnsentRegistrations() {
+            if (!registrations || registrations.length === 0) {
+                return [];
+            }
+            
+            const lastSentDate = localStorage.getItem('sousvide_last_sent') || '2000-01-01';
+            
+            return registrations.filter(reg => 
+                reg.date > lastSentDate || 
+                (reg.date === lastSentDate && !isRegistrationSent(reg))
+            );
+        }
+
+        // Slimme upload functie
+        async function intelligentUpload() {
+            const unsentRegs = getUnsentRegistrations();
+            const lastUpload = localStorage.getItem('last_upload_time');
+            const now = Date.now();
+            
+            // Upload triggers:
+            const shouldUpload = 
+                unsentRegs.length >= 5 ||  // 5+ registraties pending
+                (lastUpload && (now - parseInt(lastUpload)) > 4 * 60 * 60 * 1000) || // 4 uur geleden
+                !lastUpload; // Eerste keer
+            
+            if (shouldUpload && unsentRegs.length > 0) {
+                showStatus('Uploaden batch naar OneDrive...', 'success');
+                const success = await sendDataToOneDrive();
+                
+                if (success) {
+                    localStorage.setItem('last_upload_time', now.toString());
+                    showStatus(`${unsentRegs.length} registraties geüpload!`, 'success');
+                } else {
+                    showStatus('Upload mislukt - probeer later opnieuw', 'error');
+                }
+            } else {
+                showStatus('Registratie opgeslagen', 'success');
+            }
+        }
+
+        // Check bij opstarten voor pending uploads
+        async function checkPendingUploadsOnStartup() {
+            console.log('=== STARTUP UPLOAD CHECK ===');
+            
+            if (!account) {
+                console.log('Not logged in, skipping upload check');
+                return;
+            }
+            
+            const unsentRegs = getUnsentRegistrations();
+            const lastUpload = localStorage.getItem('last_upload_time');
+            const lastAppOpen = localStorage.getItem('last_app_open');
+            const now = Date.now();
+            
+            // Sla huidige tijd op als laatste app opening
+            localStorage.setItem('last_app_open', now.toString());
+            
+            console.log(`Unsent registrations: ${unsentRegs.length}`);
+            console.log(`Last upload: ${lastUpload ? new Date(parseInt(lastUpload)).toLocaleString() : 'Never'}`);
+            console.log(`Last app open: ${lastAppOpen ? new Date(parseInt(lastAppOpen)).toLocaleString() : 'Never'}`);
+            
+            // Upload als er pending data is EN een van deze condities:
+            const needsUpload = unsentRegs.length > 0 && (
+                !lastUpload || // Nog nooit geüpload
+                !lastAppOpen || // Eerste keer app openen
+                (now - parseInt(lastUpload)) > 4 * 60 * 60 * 1000 || // >4 uur sinds laatste upload
+                unsentRegs.length >= 5 // Of 5+ registraties pending
+            );
+            
+            if (needsUpload) {
+                console.log(`✅ Upload needed: ${unsentRegs.length} registrations`);
+                showStatus(`${unsentRegs.length} registratie(s) uploaden bij opstarten...`, 'success');
+                
+                const success = await sendDataToOneDrive();
+                
+                if (success) {
+                    localStorage.setItem('last_upload_time', now.toString());
+                    showStatus(`✅ ${unsentRegs.length} registratie(s) geüpload bij opstarten!`, 'success');
+                } else {
+                    showStatus('❌ Upload bij opstarten mislukt - probeer handmatig', 'error');
+                }
+            } else {
+                console.log('No upload needed at startup');
+                if (unsentRegs.length > 0) {
+                    showStatus(`${unsentRegs.length} registratie(s) wachten op upload`, 'success');
+                }
+            }
+            
+            // Ruim ook meteen oude data op
+            const removedCount = cleanupOldData();
+            if (removedCount > 0) {
+                console.log(`Cleaned up ${removedCount} old registrations`);
+            }
+        }
+
+        // Maintenance functie
+        function performMaintenanceIfNeeded() {
+            const lastMaintenance = localStorage.getItem('last_maintenance');
+            const now = Date.now();
+            const ONE_DAY = 24 * 60 * 60 * 1000;
+            
+            // Doe maintenance als het >24 uur geleden is of nooit gedaan
+            if (!lastMaintenance || (now - parseInt(lastMaintenance)) > ONE_DAY) {
+                console.log('Performing maintenance cleanup...');
+                
+                const removedCount = cleanupOldData();
+                if (removedCount > 0) {
+                    console.log(`Maintenance: cleaned up ${removedCount} old registrations`);
+                }
+                
+                localStorage.setItem('last_maintenance', now.toString());
+            }
+        }
+
+        // Handmatige upload controls toevoegen
+        function addManualUploadControls() {
+            const controlsDiv = document.querySelector('.controls');
+            if (controlsDiv && !document.getElementById('manual-upload-btn')) {
+                const uploadBtn = document.createElement('button');
+                uploadBtn.id = 'manual-upload-btn';
+                uploadBtn.textContent = 'Upload Nu';
+                uploadBtn.className = 'btn btn-secondary';
+                uploadBtn.style.marginLeft = '15px';
+                uploadBtn.onclick = async () => {
+                    if (!account) {
+                        showStatus('Login eerst bij Microsoft', 'error');
+                        return;
+                    }
+                    
+                    const unsentRegs = getUnsentRegistrations();
+                    if (unsentRegs.length === 0) {
+                        showStatus('Geen pending registraties om te uploaden', 'error');
+                        return;
+                    }
+                    
+                    showStatus(`Handmatig uploaden van ${unsentRegs.length} registraties...`, 'success');
+                    const success = await sendDataToOneDrive();
+                    
+                    if (success) {
+                        showStatus(`${unsentRegs.length} registraties handmatig geüpload!`, 'success');
+                    }
+                };
+                
+                controlsDiv.appendChild(uploadBtn);
+            }
+        }
+
+        // Update UI based on sign-in status
+        function updateUIForSignedInUser() {
+            if (account) {
+                // Update send button to show OneDrive option
+                updateSendButton();
+                showStatus(`Ingelogd als ${account.name || account.username}`, 'success');
+                
+                // Verwijder login prompt als deze er is
+                const overlay = document.getElementById('login-overlay');
+                if (overlay) {
+                    overlay.remove();
+                }
+                
+                // Voeg handmatige upload controls toe
+                addManualUploadControls();
+            }
+        }
+
+        // Update the send button to include OneDrive option
+        function updateSendButton() {
+            const sendButton = document.getElementById('send-data-btn');
+            if (sendButton && account) {
+                sendButton.textContent = 'Versturen naar OneDrive';
+                sendButton.onclick = sendDataToOneDrive;
+            }
+        }
+
+        // Update auth buttons based on login status
+        function updateAuthButtons() {
+            const signInBtn = document.getElementById('sign-in-btn');
+            const signOutBtn = document.getElementById('sign-out-btn');
+            const userInfo = document.getElementById('user-info');
+            
+            if (account) {
+                if (signInBtn) signInBtn.style.display = 'none';
+                if (signOutBtn) signOutBtn.style.display = 'block';
+                if (userInfo) userInfo.textContent = `Ingelogd: ${account.name || account.username}`;
+            } else {
+                if (signInBtn) signInBtn.style.display = 'block';
+                if (signOutBtn) signOutBtn.style.display = 'none';
+                if (userInfo) userInfo.textContent = '';
+            }
+        }
+
+        // Modified sendData function for OneDrive
+        async function sendDataToOneDrive() {
+            if (!registrations || registrations.length === 0) {
+                showStatus('Geen gegevens om te versturen', 'error');
+                return false;
+            }
+            
+            if (!account) {
+                showStatus('Eerst inloggen bij Microsoft', 'error');
+                await signInToMicrosoft();
+                return false;
+            }
+            
+            // Get new registrations (same logic as original sendData)
+            const lastSentDate = localStorage.getItem('sousvide_last_sent') || '2000-01-01';
+            const newRegistrations = registrations.filter(reg => 
+                reg.date > lastSentDate || 
+                (reg.date === lastSentDate && !isRegistrationSent(reg))
+            );
+            
+            if (newRegistrations.length === 0) {
+                const removedCount = cleanupOldData();
+                if (removedCount > 0) {
+                    showStatus(`Alle gegevens zijn al verzonden. ${removedCount} oude registraties opgeruimd.`, 'success');
+                } else {
+                    showStatus('Alle gegevens zijn al verzonden', 'error');
+                }
+                return false;
+            }
+            
+            // Create CSV content (same as original)
+            let csvContent = 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n';
+            
+            newRegistrations.forEach(reg => {
+                if (reg.hours && typeof reg.hours === 'object') {
+                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                            Object.entries(activities).forEach(([activity, hours]) => {
+                                csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
+                            });
+                        });
+                    } else {
+                        Object.entries(reg.hours).forEach(([activity, hours]) => {
+                            csvContent += `${reg.employee || 'Onbekend'},${reg.workLineName || 'Onbekend'},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
+                        });
+                    }
+                }
+            });
+            
+            if (csvContent === 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n') {
+                showStatus('Geen geldige gegevens om te versturen', 'error');
+                return false;
+            }
+            
+            // Upload to OneDrive instead of downloading
+            const now = new Date();
+            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
+            const fileName = `tijdregistratie_versturen_${timestamp}.csv`;
+            
+            const success = await uploadCSVToOneDrive(csvContent, fileName);
+            
+            if (success) {
+                // Mark as sent and cleanup (same as original)
+                markRegistrationsAsSent(newRegistrations);
+                const today = new Date().toISOString().split('T')[0];
+                localStorage.setItem('sousvide_last_sent', today);
+                
+                const removedCount = cleanupOldData();
+                let statusMessage = `${newRegistrations.length} nieuwe registraties naar OneDrive verzonden!`;
+                if (removedCount > 0) {
+                    statusMessage += ` ${removedCount} oude registraties opgeruimd.`;
+                }
+                
+                showStatus(statusMessage, 'success');
+                updateDataPreview();
+                return true;
+            }
+            
+            return false;
+        }
+
+        // Modal functies
+        function openEmployeeModal() {
+            document.getElementById('employee-modal').classList.add('show');
+        }
+
+        function closeEmployeeModal() {
+            document.getElementById('employee-modal').classList.remove('show');
+        }
+
+        // Klik buiten modal om te sluiten
+        window.onclick = function(event) {
+            const modal = document.getElementById('employee-modal');
+            if (event.target === modal) {
+                closeEmployeeModal();
+            }
+        }
+
+        // Data management toggle
+        function toggleDataManagement() {
+            const managementEl = document.getElementById('data-management');
+            const btnEl = event.target;
+            
+            if (managementEl.classList.contains('hidden')) {
+                managementEl.classList.remove('hidden');
+                btnEl.textContent = 'Verberg opties';
+            } else {
+                managementEl.classList.add('hidden');
+                btnEl.textContent = 'Beheer opties';
+            }
+        }
+
+        // Werknemers laden en opslaan
+        function loadEmployees() {
+            const savedEmployees = localStorage.getItem('sousvide_employees');
+            if (savedEmployees) {
+                employees = JSON.parse(savedEmployees);
+            }
+            updateEmployeeList();
+            updateEmployeeGrid();
+        }
+
+        function saveEmployees() {
+            localStorage.setItem('sousvide_employees', JSON.stringify(employees));
+        }
+
+        // Werknemerslijst updaten
+        function updateEmployeeList() {
+            const listEl = document.getElementById('employee-list');
+            listEl.innerHTML = '';
+            
+            employees.forEach(employee => {
+                const item = document.createElement('div');
+                item.className = 'employee-item';
+                item.innerHTML = `
+                    <span>${employee}</span>
+                    <button class="btn-remove" onclick="removeEmployee('${employee}')">Verwijder</button>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        // Werknemers grid updaten
+        function updateEmployeeGrid() {
+            const gridEl = document.getElementById('employee-grid');
+            gridEl.innerHTML = '';
+            
+            employees.forEach(employee => {
+                const btn = document.createElement('button');
+                btn.className = 'employee-btn';
+                btn.textContent = employee;
+                btn.onclick = () => selectEmployee(employee);
+                gridEl.appendChild(btn);
+            });
+        }
+
+        // Werknemer toevoegen
+        function addEmployee() {
+            const nameInput = document.getElementById('new-employee-name');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                showStatus('Voer een naam in', 'error');
+                return;
+            }
+            
+            if (employees.includes(name)) {
+                showStatus('Deze werknemer bestaat al', 'error');
+                return;
+            }
+            
+            employees.push(name);
+            employees.sort();
+            saveEmployees();
+            updateEmployeeList();
+            updateEmployeeGrid();
+            
+            nameInput.value = '';
+            showStatus(`${name} toegevoegd`, 'success');
+        }
+
+        // Werknemer verwijderen
+        function removeEmployee(name) {
+            if (confirm(`Weet je zeker dat je ${name} wilt verwijderen?`)) {
+                employees = employees.filter(emp => emp !== name);
+                saveEmployees();
+                updateEmployeeList();
+                updateEmployeeGrid();
+                showStatus(`${name} verwijderd`, 'success');
+            }
+        }
+
+        // Werknemer selecteren
+        function selectEmployee(name) {
+            document.querySelectorAll('#employee-grid .employee-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            currentEmployee = name;
+            currentWorkLine = null;
+            multiWorkLineData = {};
+            
+            document.getElementById('workline-selection').classList.remove('hidden');
+            document.getElementById('hours-registration').classList.add('hidden');
+            document.getElementById('total-overview').classList.add('hidden');
+            
+            // Reset werklijnselectie
+            document.querySelectorAll('#workline-grid .workline-btn').forEach(btn => btn.classList.remove('selected'));
+        }
+
+        // Werklijn selecteren (met automatisch opslaan van vorige)
+        function selectWorkLine(workLineKey) {
+            console.log('selectWorkLine called:', workLineKey);
+            
+            // Sla huidige data op als er al een werklijn actief was
+            if (currentWorkLine) {
+                saveCurrentWorkLineData();
+            }
+            
+            // Wissel naar nieuwe werklijn
+            document.querySelectorAll('#workline-grid .workline-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            currentWorkLine = workLineKey;
+            
+            const workLine = workLines[workLineKey];
+            document.getElementById('hours-registration').classList.remove('hidden');
+            document.getElementById('total-overview').classList.remove('hidden');
+            
+            generateActivitiesTable(workLine.activities);
+            loadWorkLineData(workLineKey);
+            updateTotalOverview();
+        }
+
+        // Sla huidige werklijn data op
+        function saveCurrentWorkLineData() {
+            if (!currentWorkLine) return;
+            
+            const activities = workLines[currentWorkLine].activities;
+            const workLineData = {};
+            
+            activities.forEach(activity => {
+                const inputId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
+                const input = document.getElementById(inputId);
+                if (input && input.value && input.value !== '0') {
+                    const hours = parseFloat(input.value);
+                    if (hours > 0) {
+                        // Check if this is an "Overig" activity and get description
+                        let activityName = activity;
+                        if (activity.toLowerCase() === 'overig') {
+                            const descriptionInput = document.getElementById(inputId + '-description');
+                            if (descriptionInput && descriptionInput.value.trim()) {
+                                activityName = `Overig: ${descriptionInput.value.trim()}`;
+                            }
+                        }
+                        workLineData[activityName] = hours;
+                    }
+                }
+            });
+            
+            if (Object.keys(workLineData).length > 0) {
+                multiWorkLineData[currentWorkLine] = workLineData;
+            } else {
+                delete multiWorkLineData[currentWorkLine];
+            }
+        }
+
+        // Laad werklijn data
+        function loadWorkLineData(workLineKey) {
+            const activities = workLines[workLineKey].activities;
+            
+            activities.forEach(activity => {
+                const inputId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
+                const input = document.getElementById(inputId);
+                if (input) {
+                    // Check for saved data that might include description for "Overig"
+                    let savedHours = 0;
+                    let savedDescription = '';
+                    
+                    if (multiWorkLineData[workLineKey]) {
+                        // First check for exact match
+                        if (multiWorkLineData[workLineKey][activity]) {
+                            savedHours = multiWorkLineData[workLineKey][activity];
+                        } else if (activity.toLowerCase() === 'overig') {
+                            // For "Overig", check for entries that start with "Overig:"
+                            for (let key in multiWorkLineData[workLineKey]) {
+                                if (key.startsWith('Overig:')) {
+                                    savedHours = multiWorkLineData[workLineKey][key];
+                                    savedDescription = key.substring(7).trim(); // Remove "Overig: "
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    input.value = savedHours;
+                    
+                    // Set description for "Overig" if available
+                    if (activity.toLowerCase() === 'overig' && savedDescription) {
+                        const descriptionInput = document.getElementById(inputId + '-description');
+                        if (descriptionInput) {
+                            descriptionInput.value = savedDescription;
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update totaal overzicht van alle werklijnen
+        function updateTotalOverview() {
+            const overviewEl = document.getElementById('total-overview');
+            const totalsEl = document.getElementById('workline-totals');
+            
+            // Sla eerst huidige data op
+            if (currentWorkLine) {
+                saveCurrentWorkLineData();
+            }
+            
+            // Clear existing content
+            totalsEl.innerHTML = '';
+            
+            let grandTotal = 0;
+            
+            // Toon alle werklijnen met data
+            Object.entries(multiWorkLineData).forEach(([workLineKey, activities]) => {
+                const workLineName = workLines[workLineKey].name;
+                const workLineTotal = Object.values(activities).reduce((sum, hours) => sum + hours, 0);
+                grandTotal += workLineTotal;
+                
+                const workLineDiv = document.createElement('div');
+                workLineDiv.className = 'workline-total';
+                workLineDiv.innerHTML = `
+                    <div class="name">${workLineName}</div>
+                    <div class="hours">${workLineTotal.toFixed(2)}u</div>
+                `;
+                totalsEl.appendChild(workLineDiv);
+            });
+            
+            // Voeg grand total toe (altijd tonen)
+            const grandTotalDiv = document.createElement('div');
+            grandTotalDiv.className = grandTotal > 8 ? 'grand-total warning' : 'grand-total';
+            grandTotalDiv.innerHTML = `
+                <div class="name">TOTAAL</div>
+                <div class="hours">${grandTotal.toFixed(2)}u</div>
+            `;
+            totalsEl.appendChild(grandTotalDiv);
+            
+            // Toon overzicht altijd als er een werklijn geselecteerd is
+            if (currentWorkLine) {
+                overviewEl.classList.remove('hidden');
+            } else {
+                overviewEl.classList.add('hidden');
+            }
+        }
+
+        // Activiteiten tabel genereren
+        function generateActivitiesTable(activities) {
+            const tbody = document.getElementById('activities-tbody');
+            tbody.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const activityId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
+                const row = document.createElement('tr');
+                
+                // Check if this is an "Overig" activity to replace with input field
+                const isOverig = activity.toLowerCase() === 'overig';
+                const activityDisplay = isOverig ? 
+                    `<input type="text" placeholder="Overig, Namelijk:" id="${activityId}-description" 
+                     class="overig-description">` : 
+                    activity;
+                
+                row.innerHTML = `
+                    <td>${activityDisplay}</td>
+                    <td>
+                        <div class="hour-controls">
+                            <button class="btn-fullday" onclick="setFullDay('${activityId}')">Hele dag</button>
+                            <div class="hour-buttons-group">
+                                <button class="hour-btn minus" onclick="changeHours('${activityId}', -1)">-1</button>
+                                <button class="hour-btn minus" onclick="changeHours('${activityId}', -0.25)">-0,25</button>
+                                <input type="number" class="hour-input" id="${activityId}" min="0" max="12" step="0.25" value="0" readonly>
+                                <button class="hour-btn plus" onclick="changeHours('${activityId}', 0.25)">+0,25</button>
+                                <button class="hour-btn plus" onclick="changeHours('${activityId}', 1)">+1</button>
+                                <button class="hour-btn plus" onclick="changeHours('${activityId}', 4)">+4</button>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn-clear" onclick="clearHours('${activityId}')">Wis</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Uren wijzigen met +/- knoppen
+        function changeHours(inputId, change) {
+            const input = document.getElementById(inputId);
+            const currentValue = parseFloat(input.value) || 0;
+            const newValue = Math.max(0, Math.min(12, currentValue + change));
+            input.value = newValue;
+            updateTotalOverview();
+        }
+
+        // Hele dag instellen voor specifieke activiteit (7.5 uur)
+        function setFullDay(inputId) {
+            clearAllHours();
+            document.getElementById(inputId).value = '7.5';
+            updateTotalOverview();
+        }
+
+        // Uren wissen voor specifieke activiteit
+        function clearHours(inputId) {
+            document.getElementById(inputId).value = '0';
+            updateTotalOverview();
+        }
+
+        // Alle uren wissen
+        function clearAllHours() {
+            if (!currentWorkLine) return;
+            
+            const activities = workLines[currentWorkLine].activities;
+            activities.forEach(activity => {
+                const inputId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = '0';
+                }
+            });
+        }
+
+        // LOGIN BEVEILIGING - Optie 2: Verplichte login bij opstarten
+        function showLoginPrompt() {
+            const loginOverlay = document.createElement('div');
+            loginOverlay.id = 'login-overlay';
+            loginOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 2000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            const loginModal = document.createElement('div');
+            loginModal.style.cssText = `
+                background: white;
+                padding: 40px;
+                border-radius: 12px;
+                text-align: center;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            `;
+            
+            loginModal.innerHTML = `
+                <h2 style="color: #dc3545; margin-bottom: 20px; font-size: 1.8em;">
+                    🔒 Login Vereist
+                </h2>
+                <p style="margin-bottom: 25px; font-size: 1.2em; color: #666;">
+                    Voor veilig gebruik van de tijdregistratie is inloggen bij Microsoft verplicht.
+                    Data wordt automatisch gesynchroniseerd naar OneDrive.
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="signInToMicrosoft()" style="
+                        background: #fed500;
+                        color: #1a1a1a;
+                        padding: 16px 32px;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 1.2em;
+                        font-weight: 600;
+                        cursor: pointer;
+                        min-width: 180px;
+                    ">
+                        Inloggen Microsoft
+                    </button>
+                    <button onclick="dismissLoginPrompt()" style="
+                        background: #6c757d;
+                        color: white;
+                        padding: 16px 32px;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 1.2em;
+                        font-weight: 600;
+                        cursor: pointer;
+                        min-width: 180px;
+                    ">
+                        Later
+                    </button>
+                </div>
+                <p style="margin-top: 15px; font-size: 0.9em; color: #999;">
+                    Let op: Zonder login blijft data alleen lokaal opgeslagen
+                </p>
+            `;
+            
+            loginOverlay.appendChild(loginModal);
+            document.body.appendChild(loginOverlay);
+        }
+
+        function dismissLoginPrompt() {
+            const overlay = document.getElementById('login-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+            showStatus('⚠️ Niet ingelogd - registraties blijven lokaal opgeslagen', 'error');
+        }
+
+        // Wijzig saveRegistration om waarschuwing te geven als niet ingelogd
+        async function saveRegistration() {
+            if (!currentEmployee) return;
+            
+            saveCurrentWorkLineData();
+            
+            if (Object.keys(multiWorkLineData).length === 0) {
+                showStatus('Voer minimaal één activiteit in', 'error');
+                return;
+            }
+            
+            // Bereken totaal en maak registratie
+            let totalHours = 0;
+            const workLineNames = [];
+            
+            Object.entries(multiWorkLineData).forEach(([workLineKey, activities]) => {
+                workLineNames.push(workLines[workLineKey].name);
+                Object.values(activities).forEach(hours => {
+                    totalHours += hours;
+                });
+            });
+            
+            const registration = {
+                employee: currentEmployee,
+                workLineNames: workLineNames,
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
+                hours: multiWorkLineData,
+                total: totalHours
+            };
+            
+            // Sla lokaal op
+            registrations.unshift(registration);
+            localStorage.setItem('sousvide_registrations', JSON.stringify(registrations));
+            
+            // AUTO-UPLOAD strategie met waarschuwing
+            if (account) {
+                await intelligentUpload();
+            } else {
+                showStatus('⚠️ Opgeslagen lokaal - login voor automatische upload', 'error');
+            }
+            
+            resetSelection();
+            updateDataPreview();
+        }
+
+        // Selectie resetten
+        function resetSelection() {
+            currentEmployee = null;
+            currentWorkLine = null;
+            multiWorkLineData = {};
+            document.querySelectorAll('.employee-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('workline-selection').classList.add('hidden');
+            document.getElementById('hours-registration').classList.add('hidden');
+            document.getElementById('total-overview').classList.add('hidden');
+        }
+
+        // Status bericht tonen
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            
+            setTimeout(() => {
+                statusEl.textContent = '';
+                statusEl.className = '';
+            }, 4000);
+        }
+
+        // Data preview updaten (per afdeling in aparte vakken)
+        function updateDataPreview() {
+            // Reset alle department previews
+            const departments = ['schillijn', 'inpakken', 'sousvide', 'koelcel', 'fusthal', 'puree'];
+            departments.forEach(dept => {
+                const preview = document.getElementById(`${dept}-preview`);
+                if (preview) preview.textContent = 'Nog geen registraties';
+            });
+            
+            if (!registrations || registrations.length === 0) {
+                return;
+            }
+            
+            const sortedRegistrations = [...registrations].sort((a, b) => {
+                const dateCompare = new Date(b.date) - new Date(a.date);
+                if (dateCompare !== 0) return dateCompare;
+                
+                const timeA = a.time || '00:00';
+                const timeB = b.time || '00:00';
+                return timeB.localeCompare(timeA);
+            });
+            
+            // Groepeer per afdeling
+            const departmentData = {
+                schillijn: [],
+                inpakken: [],
+                sousvide: [],
+                koelcel: [],
+                fusthal: [],
+                puree: []
+            };
+            
+            sortedRegistrations.forEach(reg => {
+                if (!reg.hours) return;
+                
+                if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                    // Nieuwe format (object met werklijnen als keys)
+                    Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                        if (departmentData[workLineKey]) {
+                            Object.entries(activities).forEach(([activity, hours]) => {
+                                departmentData[workLineKey].push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
+                            });
+                        }
+                    });
+                } else if (reg.workLineName) {
+                    // Enkele werklijn format - zoek de workLineKey
+                    const workLineKey = Object.keys(workLines).find(key => workLines[key].name === reg.workLineName);
+                    if (workLineKey && departmentData[workLineKey]) {
+                        Object.entries(reg.hours).forEach(([activity, hours]) => {
+                            departmentData[workLineKey].push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
+                        });
+                    }
+                } else {
+                    // Oude format - probeer te raden op basis van activiteiten (fallback)
+                    Object.entries(reg.hours).forEach(([activity, hours]) => {
+                        // Voeg toe aan 'onbekend' of eerste afdeling als fallback
+                        if (departmentData.schillijn) {
+                            departmentData.schillijn.push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
+                        }
+                    });
+                }
+            });
+            
+            // Update elke afdeling preview
+            Object.entries(departmentData).forEach(([deptKey, lines]) => {
+                const preview = document.getElementById(`${deptKey}-preview`);
+                if (preview) {
+                    if (lines.length > 0) {
+                        preview.textContent = lines.join('\n');
+                    } else {
+                        preview.textContent = 'Nog geen registraties';
+                    }
+                }
+            });
+        }
+
+        // Gegevens versturen (fallback voor als OneDrive niet beschikbaar is)
+        function sendData() {
+            if (account) {
+                sendDataToOneDrive();
+                return;
+            }
+            
+            if (!registrations || registrations.length === 0) {
+                showStatus('Geen gegevens om te versturen', 'error');
+                return;
+            }
+            
+            // Haal de laatste verzenddatum op
+            const lastSentDate = localStorage.getItem('sousvide_last_sent') || '2000-01-01';
+            
+            // Filter alleen nieuwe gegevens (nog niet verzonden)
+            const newRegistrations = registrations.filter(reg => 
+                reg.date > lastSentDate || 
+                (reg.date === lastSentDate && !isRegistrationSent(reg))
+            );
+            
+            if (newRegistrations.length === 0) {
+                // Ruim oude data op, ook als er niets te versturen is
+                const removedCount = cleanupOldData();
+                if (removedCount > 0) {
+                    showStatus(`Alle gegevens zijn al verzonden. ${removedCount} oude registraties opgeruimd (ouder dan 35 dagen).`, 'success');
+                } else {
+                    showStatus('Alle gegevens zijn al verzonden', 'error');
+                }
+                return;
+            }
+            
+            // Maak CSV van nieuwe gegevens
+            let csvContent = 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n';
+            
+            newRegistrations.forEach(reg => {
+                if (reg.hours && typeof reg.hours === 'object') {
+                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                        // Nieuwe format (object met werklijnen als keys)
+                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                            Object.entries(activities).forEach(([activity, hours]) => {
+                                csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
+                            });
+                        });
+                    } else {
+                        // Oude format (direct activities)
+                        Object.entries(reg.hours).forEach(([activity, hours]) => {
+                            csvContent += `${reg.employee || 'Onbekend'},${reg.workLineName || 'Onbekend'},${reg.date || 'Onbekend'},${reg.time || 'Onbekend'},${activity},${hours}\n`;
+                        });
+                    }
+                }
+            });
+            
+            if (csvContent === 'Werknemer,Afdeling,Datum,Tijd,Activiteit,Uren\n') {
+                showStatus('Geen geldige gegevens om te versturen', 'error');
+                return;
+            }
+            
+            // Download de CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const now = new Date();
+            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
+            link.setAttribute('href', url);
+            link.setAttribute('download', `tijdregistratie_versturen_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Markeer als verzonden
+            markRegistrationsAsSent(newRegistrations);
+            
+            // Update laatste verzenddatum
+            const today = new Date().toISOString().split('T')[0];
+            localStorage.setItem('sousvide_last_sent', today);
+            
+            // Ruim oude data op na het versturen
+            const removedCount = cleanupOldData();
+            
+            let statusMessage = `${newRegistrations.length} nieuwe registraties verzonden!`;
+            if (removedCount > 0) {
+                statusMessage += ` ${removedCount} oude registraties opgeruimd (ouder dan 35 dagen).`;
+            }
+            
+            showStatus(statusMessage, 'success');
+            updateDataPreview();
+        }
+        
+        // Check of registratie al verzonden is
+        function isRegistrationSent(registration) {
+            const sentRegistrations = JSON.parse(localStorage.getItem('sousvide_sent_registrations') || '[]');
+            const regId = `${registration.employee}_${registration.date}_${registration.time}`;
+            return sentRegistrations.includes(regId);
+        }
+        
+        // Markeer registraties als verzonden
+        function markRegistrationsAsSent(registrations) {
+            const sentRegistrations = JSON.parse(localStorage.getItem('sousvide_sent_registrations') || '[]');
+            
+            registrations.forEach(reg => {
+                const regId = `${reg.employee}_${reg.date}_${reg.time}`;
+                if (!sentRegistrations.includes(regId)) {
+                    sentRegistrations.push(regId);
+                }
+            });
+            
+            localStorage.setItem('sousvide_sent_registrations', JSON.stringify(sentRegistrations));
+        }
+
+        // CSV downloaden (alle data)
+        function downloadCSV() {
+            if (!registrations || registrations.length === 0) {
+                showStatus('Geen data om te downloaden', 'error');
+                return;
+            }
+            
+            let csvContent = 'Werknemer,Afdeling,Datum,Activiteit,Uren\n';
+            
+            registrations.forEach(reg => {
+                if (reg.hours && typeof reg.hours === 'object') {
+                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                        // Nieuwe format (object met werklijnen als keys)
+                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                            Object.entries(activities).forEach(([activity, hours]) => {
+                                csvContent += `${reg.employee || 'Onbekend'},${workLineName},${reg.date || 'Onbekend'},${activity},${hours}\n`;
+                            });
+                        });
+                    } else {
+                        // Oude format (direct activities)
+                        Object.entries(reg.hours).forEach(([activity, hours]) => {
+                            csvContent += `${reg.employee || 'Onbekend'},${reg.workLineName || 'Onbekend'},${reg.date || 'Onbekend'},${activity},${hours}\n`;
+                        });
+                    }
+                }
+            });
+            
+            if (csvContent === 'Werknemer,Afdeling,Datum,Activiteit,Uren\n') {
+                showStatus('Geen geldige data om te downloaden', 'error');
+                return;
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const now = new Date();
+            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
+            link.setAttribute('href', url);
+            link.setAttribute('download', `tijdregistratie_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showStatus('CSV gedownload!', 'success');
+        }
+
+        function clearAllData() {
+            if (confirm('Weet je zeker dat je alle registraties wilt wissen?')) {
+                registrations = [];
+                localStorage.removeItem('sousvide_registrations');
+                localStorage.removeItem('sousvide_sent_registrations');
+                updateDataPreview();
+                showStatus('Alle data gewist', 'success');
+            }
+        }
+
+        // Ruim data ouder dan 35 dagen op
+        function cleanupOldData() {
+            const thirtyFiveDaysAgo = new Date();
+            thirtyFiveDaysAgo.setDate(thirtyFiveDaysAgo.getDate() - 35);
+            const cutoffDate = thirtyFiveDaysAgo.toISOString().split('T')[0];
+            
+            const originalCount = registrations.length;
+            registrations = registrations.filter(reg => reg.date >= cutoffDate);
+            const removedCount = originalCount - registrations.length;
+            
+            if (removedCount > 0) {
+                localStorage.setItem('sousvide_registrations', JSON.stringify(registrations));
+                updateDataPreview();
+                console.log(`${removedCount} oude registraties opgeruimd (ouder dan ${cutoffDate})`);
+                return removedCount;
+            }
+            return 0;
+        }
+
+        // Data laden bij opstarten
+        function loadData() {
+            try {
+                const savedData = localStorage.getItem('sousvide_registrations');
+                if (savedData) {
+                    registrations = JSON.parse(savedData);
+                    if (!Array.isArray(registrations)) {
+                        registrations = [];
+                    }
+                    updateDataPreview();
+                }
+            } catch (error) {
+                console.error('Fout bij laden data:', error);
+                registrations = [];
+                localStorage.removeItem('sousvide_registrations');
+            }
+        }
+
+        // AANGEPASTE INITIALISATIE MET LOGIN BEVEILIGING
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, starting initialization...');
+            
+            const nameInput = document.getElementById('new-employee-name');
+            if (nameInput) {
+                nameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addEmployee();
+                    }
+                });
+            }
+            
+            loadEmployees();
+            loadData();
+            
+            // Start MSAL initialization
+            console.log('Starting MSAL initialization...');
+            initializeMSAL().then(() => {
+                // NA MSAL initialisatie: check voor pending uploads
+                setTimeout(() => {
+                    checkPendingUploadsOnStartup();
+                    performMaintenanceIfNeeded(); // Doe maintenance bij opstarten
+                    
+                    // LOGIN BEVEILIGING: Toon login prompt als niet ingelogd
+                    if (!account) {
+                        setTimeout(() => {
+                            showLoginPrompt();
+                        }, 1000); // Wacht 1 sec voor betere UX
+                    }
+                }, 2000); // Wacht 2 sec voor volledige MSAL setup
+            });
+        });
+
+        // EVENT LISTENERS VOOR SMART UPLOAD
+        // Upload bij tab wordt verborgen (extra zekerheid)
+        document.addEventListener('visibilitychange', async () => {
+            if (document.hidden && account) {
+                const unsentRegs = getUnsentRegistrations();
+                if (unsentRegs.length > 0) {
+                    console.log(`Page hidden, uploading ${unsentRegs.length} pending registrations`);
+                    showStatus('Uploaden voor achtergrond...', 'success');
+                    await sendDataToOneDrive();
+                }
+            }
+        });
+
+        // Upload bij pagina verlaten (minder betrouwbaar, maar extra poging)
+        window.addEventListener('beforeunload', async (e) => {
+            if (account && getUnsentRegistrations().length > 0) {
+                // Laatste kans upload - maar deze werkt niet altijd betrouwbaar
+                console.log('Attempting upload before page unload...');
+                // Note: beforeunload is niet betrouwbaar voor async operations
+                // Dit is meer een "best effort" poging
+            }
+        });
+    </script>
+</body>
+</html>
+                
