@@ -790,10 +790,7 @@
                 grid-template-columns: repeat(6, 1fr);
                 gap: 10px;
             }
-            
-            .workline-grid {
-                grid-template-columns: repeat(6, 1fr) !important;
-            }
+            /* workline-grid wordt nu hierboven geregeld */
         }
         
         @media (max-width: 900px) {
@@ -802,16 +799,7 @@
                 gap: 10px;
             }
             
-            .workline-grid {
-                grid-template-columns: repeat(6, 1fr) !important;
-                gap: 6px;
-            }
-            
-            .workline-btn {
-                font-size: 0.8em;
-                min-height: 40px;
-                padding: 8px 6px;
-            }
+            /* workline-grid blijft 6 kolommen - zie hierboven */
             
             .user-info {
                 font-size: 1em;
@@ -848,15 +836,7 @@
                 grid-template-columns: repeat(3, 1fr);
             }
             
-            .workline-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .workline-btn {
-                font-size: 0.75em;
-                min-height: 35px;
-                padding: 6px 4px;
-            }
+            /* workline-grid blijft 6 kolommen - zie hierboven */
             
             .departments-row {
                 grid-template-columns: 1fr;
@@ -940,7 +920,7 @@
         <!-- Stap 2: Werklijn selecteren -->
         <div class="section hidden" id="workline-selection">
             <h2>2. Kies afdeling:</h2>
-            <div class="workline-grid" id="workline-grid">
+            <div class="employee-grid" id="workline-grid">
                 <button class="workline-btn" onclick="selectWorkLine('schillijn')">Schillijn</button>
                 <button class="workline-btn" onclick="selectWorkLine('inpakken')">Inpakken</button>
                 <button class="workline-btn" onclick="selectWorkLine('sousvide')">Sous-vide</button>
