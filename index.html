@@ -48,9 +48,14 @@
 
         .header-buttons {
             display: flex;
-            gap: 10px;
+            gap: 20px;
             align-items: center;
             flex-wrap: wrap;
+        }
+
+        .planning-upload-section {
+            display: flex;
+            align-items: center;
         }
 
         #auth-buttons {
@@ -168,13 +173,25 @@
         }
 
         .file-input {
-            padding: 12px;
+            padding: 12px 16px;
             border: 2px solid #dee2e6;
             border-radius: 8px;
             background: white;
-            font-size: 1.1em;
-            min-width: 250px;
-            margin-right: 15px;
+            font-size: 1em;
+            min-width: 200px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-input:hover {
+            border-color: #0063ac;
+            background: #f8f9fa;
+        }
+
+        .file-input:focus {
+            outline: none;
+            border-color: #0063ac;
+            box-shadow: 0 0 0 3px rgba(0,99,172,0.1);
         }
 
         .planning-filters {
@@ -195,30 +212,50 @@
             font-weight: 600;
             color: #495057;
             font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
         }
 
-        .planning-filter-select {
-            background: #0063ac;
-            color: white;
-            padding: 18px 24px;
-            border: none;
+        /* Nieuwe styling voor filter buttons */
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .filter-btn {
+            background: #e9ecef;
+            color: #495057;
+            padding: 16px 24px;
+            border: 2px solid #dee2e6;
             border-radius: 10px;
+            cursor: pointer;
             font-size: 1.2em;
             font-weight: 600;
-            cursor: pointer;
             transition: all 0.2s;
-            min-width: 200px;
-            min-height: 60px;
+            min-height: 56px;
+            white-space: nowrap;
         }
 
-        .planning-filter-select:hover {
-            background: #004a85;
+        .filter-btn:hover {
+            background: #007bff;
+            color: white;
+            border-color: #0056b3;
             transform: translateY(-1px);
         }
 
-        .planning-filter-select:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0,99,172,0.3);
+        .filter-btn.active {
+            background: #0063ac;
+            color: white;
+            border-color: #004a85;
+            box-shadow: 0 2px 8px rgba(0,99,172,0.3);
+        }
+
+        .filter-btn.active:hover {
+            background: #004a85;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,99,172,0.4);
         }
 
         .planning-table {
@@ -280,6 +317,43 @@
             color: #6c757d;
         }
 
+        /* Styling voor klikbare naam cellen in de planning tabel */
+        .planning-table td.clickable-name-cell {
+            cursor: pointer !important;
+            transition: all 0.2s ease;
+            position: relative;
+            font-weight: 600 !important;
+            color: #0063ac !important;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid transparent;
+        }
+
+        .planning-table td.clickable-name-cell:hover {
+            background: linear-gradient(135deg, #007bff, #0056b3) !important;
+            color: white !important;
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+            border: 2px solid #004085;
+            z-index: 10;
+        }
+
+        /* Verwijder de oude klikbare cel styling */
+        .planning-table td.clickable-cell {
+            /* Verwijderd - niet meer nodig */
+        }
+
+        .planning-table td.clickable-cell:hover {
+            /* Verwijderd - niet meer nodig */
+        }
+
+        .planning-table td.clickable-cell.empty {
+            /* Verwijderd - niet meer nodig */
+        }
+
+        .planning-table td.clickable-cell.empty:hover {
+            /* Verwijderd - niet meer nodig */
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -307,6 +381,42 @@
             overflow-y: auto;
             position: relative;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        /* Specifieke styling voor de uren modal */
+        .hours-modal-content {
+            max-width: 1400px; /* Breder voor de afdelingen grid */
+            height: 90vh; /* Iets hoger */
+        }
+
+        .hours-modal-content .workline-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+
+        /* Responsive voor modal workline grid */
+        @media (max-width: 1200px) {
+            .hours-modal-content .workline-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 800px) {
+            .hours-modal-content .workline-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .hours-modal-content .workline-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .modal-header {
@@ -361,7 +471,7 @@
 
         .workline-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 15px;
             margin-bottom: 25px;
             padding: 20px;
@@ -436,6 +546,31 @@
             background: #fed500;
             color: #1a1a1a;
             box-shadow: 0 6px 25px rgba(254,213,0,0.4);
+        }
+
+        /* Styling voor knoppen met bestaande uren */
+        .workline-btn.has-hours {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .workline-btn.has-hours:hover {
+            background: linear-gradient(135deg, #218838, #1ea085);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .workline-btn.has-hours.selected {
+            background: linear-gradient(135deg, #fed500, #ffc107);
+            color: #1a1a1a;
+            box-shadow: 0 6px 25px rgba(254,213,0,0.5);
+        }
+
+        .workline-btn small {
+            font-size: 0.8em;
+            opacity: 0.9;
+            font-weight: 500;
         }
 
         .add-employee-row {
@@ -922,6 +1057,10 @@
                 grid-template-columns: repeat(6, 1fr);
                 gap: 10px;
             }
+            
+            .workline-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
         
         @media (max-width: 900px) {
@@ -930,14 +1069,14 @@
                 gap: 10px;
             }
             
+            .workline-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
             .user-info {
                 font-size: 1em;
                 padding: 10px 14px;
                 margin-right: 15px;
-            }
-            
-            .departments-row {
-                grid-template-columns: repeat(2, 1fr);
             }
             
             .hour-controls {
@@ -957,6 +1096,12 @@
             
             .header-buttons {
                 justify-content: center;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .planning-upload-section {
+                order: -1; /* Zet upload sectie bovenaan op mobiel */
             }
         }
 
@@ -965,7 +1110,7 @@
                 grid-template-columns: repeat(3, 1fr);
             }
             
-            .departments-row {
+            .workline-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -1034,6 +1179,9 @@
         <div class="header">
             <h1>Tijdregistratie</h1>
             <div class="header-buttons">
+                <div class="planning-upload-section">
+                    <input type="file" id="planning-file" class="file-input" accept=".csv" onchange="loadPlanningCSV(event)">
+                </div>
                 <div id="auth-buttons">
                     <span id="user-info" class="user-info"></span>
                     <button id="sign-in-btn" class="btn-auth" onclick="signInToMicrosoft()">
@@ -1050,8 +1198,6 @@
         <div class="section">
             <div class="planning-section">
                 <h3>📅 Personeelsplanning</h3>
-                <input type="file" id="planning-file" class="file-input" accept=".csv" onchange="loadPlanningCSV(event)">
-                <button class="btn-uniform" onclick="clearPlanning()">Wis planning</button>
                 
                 <div id="planning-display" style="display: none;">
                     <div style="margin: 20px 0;">
@@ -1063,16 +1209,18 @@
                         <div class="planning-filters">
                             <div class="planning-filter-group">
                                 <label class="planning-filter-label">Ploeg:</label>
-                                <select id="ploeg-filter" class="planning-filter-select" onchange="filterPlanning()">
-                                    <option value="">Alle ploegen</option>
-                                </select>
+                                <div class="filter-buttons" id="ploeg-buttons">
+                                    <button class="filter-btn active" onclick="filterByPloeg('')">Alle ploegen</button>
+                                    <!-- Wordt dynamisch gevuld -->
+                                </div>
                             </div>
                             
                             <div class="planning-filter-group">
                                 <label class="planning-filter-label">Afdeling:</label>
-                                <select id="afdeling-filter" class="planning-filter-select" onchange="filterPlanning()">
-                                    <option value="">Alle afdelingen</option>
-                                </select>
+                                <div class="filter-buttons" id="afdeling-buttons">
+                                    <button class="filter-btn active" onclick="filterByAfdeling('')">Alle afdelingen</button>
+                                    <!-- Wordt dynamisch gevuld -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1085,10 +1233,66 @@
                         </table>
                     </div>
                 </div>
+                
+                <!-- Bericht wanneer geen planning geladen is -->
+                <div id="no-planning-message" style="text-align: center; padding: 40px; color: #6c757d; font-size: 1.2em;">
+                    📊 Upload een personeelsplanning CSV bestand via de knop bovenaan om te beginnen
+                </div>
             </div>
         </div>
 
-        <!-- Modal voor werknemersbeheer -->
+        <!-- Modal voor urenregistratie -->
+        <div class="modal" id="hours-modal">
+            <div class="modal-content hours-modal-content">
+                <div class="modal-header">
+                    <h2 id="hours-modal-title">Urenregistratie voor [Werknemer]</h2>
+                    <button class="btn-close" onclick="closeHoursModal()">&times;</button>
+                </div>
+                
+                <!-- Stap 1: Werklijn selecteren (nu in modal) -->
+                <div class="section" id="modal-workline-selection">
+                    <h3>1. Kies afdeling:</h3>
+                    <div id="modal-workline-grid" class="workline-grid">
+                        <button class="workline-btn" onclick="selectWorkLineInModal('schillijn')">Schillijn</button>
+                        <button class="workline-btn" onclick="selectWorkLineInModal('inpakken')">Inpakken</button>
+                        <button class="workline-btn" onclick="selectWorkLineInModal('sousvide')">Sous-vide</button>
+                        <button class="workline-btn" onclick="selectWorkLineInModal('koelcel')">Koelcel</button>
+                        <button class="workline-btn" onclick="selectWorkLineInModal('fusthal')">Fusthal</button>
+                        <button class="workline-btn" onclick="selectWorkLineInModal('puree')">Puree</button>
+                    </div>
+                </div>
+
+                <!-- Totaal overzicht van alle werklijnen (in modal) -->
+                <div class="total-overview hidden" id="modal-total-overview">
+                    <div class="workline-totals" id="modal-workline-totals">
+                        <!-- Wordt dynamisch gevuld -->
+                    </div>
+                </div>
+
+                <!-- Stap 2: Urenregistratie (in modal) -->
+                <div class="section hidden" id="modal-hours-registration">
+                    <h3>2. Voer aantal uren per activiteit in:</h3>
+                    
+                    <table class="activities-table">
+                        <thead>
+                            <tr>
+                                <th>Activiteit</th>
+                                <th style="text-align: center;">Aantal uren</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-activities-tbody">
+                            <!-- Wordt dynamisch gevuld op basis van gekozen werklijn -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="saveRegistrationFromModal()">Opslaan</button>
+                        <button class="btn btn-secondary" onclick="closeHoursModal()">Annuleren</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="modal" id="employee-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1107,17 +1311,19 @@
             </div>
         </div>
         
-        <!-- Stap 1: Werknemer selecteren -->
-        <div class="section" id="employee-selection">
+        <!-- OUDE SECTIES - NU VERBORGEN OMDAT WE DE MODAL GEBRUIKEN -->
+        
+        <!-- Stap 1: Werknemer selecteren - VERBORGEN omdat we nu vanuit planning selecteren -->
+        <div class="section hidden" id="employee-selection" style="display: none;">
             <h2>1. Kies werknemer:</h2>
             <div class="employee-grid" id="employee-grid">
                 <!-- Wordt dynamisch gevuld -->
             </div>
         </div>
 
-        <!-- Stap 2: Werklijn selecteren -->
-        <div class="section hidden" id="workline-selection">
-            <h2>2. Kies afdeling:</h2>
+        <!-- Stap 1: Werklijn selecteren - VERBORGEN omdat we nu modal gebruiken -->
+        <div class="section hidden" id="workline-selection" style="display: none;">
+            <h2>1. Kies afdeling:</h2>
             <div id="workline-grid" class="workline-grid">
                 <button class="workline-btn" onclick="selectWorkLine('schillijn')">Schillijn</button>
                 <button class="workline-btn" onclick="selectWorkLine('inpakken')">Inpakken</button>
@@ -1128,16 +1334,16 @@
             </div>
         </div>
 
-        <!-- Totaal overzicht van alle werklijnen -->
-        <div class="total-overview hidden" id="total-overview">
+        <!-- Totaal overzicht - VERBORGEN omdat we nu modal gebruiken -->
+        <div class="total-overview hidden" id="total-overview" style="display: none;">
             <div class="workline-totals" id="workline-totals">
                 <!-- Wordt dynamisch gevuld -->
             </div>
         </div>
 
-        <!-- Stap 3: Urenregistratie -->
-        <div class="section hidden" id="hours-registration">
-            <h2>3. Voer aantal uren per activiteit in:</h2>
+        <!-- Stap 2: Urenregistratie - VERBORGEN omdat we nu modal gebruiken -->
+        <div class="section hidden" id="hours-registration" style="display: none;">
+            <h2>2. Voer aantal uren per activiteit in:</h2>
             
             <table class="activities-table">
                 <thead>
@@ -1163,48 +1369,6 @@
         <!-- Data overzicht en download -->
         <div class="section">
             <div class="data-overview">
-                <h3>Uren per afdeling:</h3>
-                
-                <div class="departments-row">
-                    <!-- Schillijn -->
-                    <div class="department-overview">
-                        <h4>Schillijn</h4>
-                        <pre id="schillijn-preview">Nog geen registraties</pre>
-                    </div>
-                    
-                    <!-- Inpakken -->
-                    <div class="department-overview">
-                        <h4>Inpakken</h4>
-                        <pre id="inpakken-preview">Nog geen registraties</pre>
-                    </div>
-
-                    <!-- Sous-vide -->
-                    <div class="department-overview">
-                        <h4>Sous-vide</h4>
-                        <pre id="sousvide-preview">Nog geen registraties</pre>
-                    </div>
-                </div>
-                
-                <div class="departments-row">
-                    <!-- Koelcel -->
-                    <div class="department-overview">
-                        <h4>Koelcel</h4>
-                        <pre id="koelcel-preview">Nog geen registraties</pre>
-                    </div>
-                    
-                    <!-- Fusthal -->
-                    <div class="department-overview">
-                        <h4>Fusthal</h4>
-                        <pre id="fusthal-preview">Nog geen registraties</pre>
-                    </div>
-                    
-                    <!-- Puree -->
-                    <div class="department-overview">
-                        <h4>Puree</h4>
-                        <pre id="puree-preview">Nog geen registraties</pre>
-                    </div>
-                </div>
-
                 <!-- Werknemers totalen -->
                 <div style="margin-top: 30px;">
                     <h3 style="margin-bottom: 15px; color: #495057; font-size: 1.4em; font-weight: 600;">
@@ -1390,69 +1554,97 @@
         }
         
         function updatePloegFilter() {
-            const ploegFilter = document.getElementById('ploeg-filter');
-            const afdelingFilter = document.getElementById('afdeling-filter');
+            const ploegButtons = document.getElementById('ploeg-buttons');
+            const afdelingButtons = document.getElementById('afdeling-buttons');
             
-            // Update ploeg filter
+            // Update ploeg buttons
             const ploegen = [...new Set(allPlanningData.map(emp => emp.Ploeg || emp.ploeg))].filter(Boolean).sort();
-            ploegFilter.innerHTML = '<option value="">Alle ploegen</option>';
+            ploegButtons.innerHTML = '<button class="filter-btn active" onclick="filterByPloeg(\'\')">Alle ploegen</button>';
             ploegen.forEach(ploeg => {
-                const option = document.createElement('option');
-                option.value = ploeg;
-                option.textContent = ploeg;
-                ploegFilter.appendChild(option);
+                const button = document.createElement('button');
+                button.className = 'filter-btn';
+                button.textContent = ploeg;
+                button.onclick = () => filterByPloeg(ploeg);
+                ploegButtons.appendChild(button);
             });
             
-            // Update afdeling filter
+            // Update afdeling buttons
             const afdelingen = [...new Set(allPlanningData.map(emp => emp.Afdeling || emp.afdeling))].filter(Boolean).sort();
-            afdelingFilter.innerHTML = '<option value="">Alle afdelingen</option>';
+            afdelingButtons.innerHTML = '<button class="filter-btn active" onclick="filterByAfdeling(\'\')">Alle afdelingen</button>';
             afdelingen.forEach(afdeling => {
-                const option = document.createElement('option');
-                option.value = afdeling;
-                option.textContent = afdeling;
-                afdelingFilter.appendChild(option);
+                const button = document.createElement('button');
+                button.className = 'filter-btn';
+                button.textContent = afdeling;
+                button.onclick = () => filterByAfdeling(afdeling);
+                afdelingButtons.appendChild(button);
             });
             
             console.log('Beschikbare ploegen:', ploegen);
             console.log('Beschikbare afdelingen:', afdelingen);
         }
-        
-        function filterPlanning() {
-            const selectedPloeg = document.getElementById('ploeg-filter').value;
-            const selectedAfdeling = document.getElementById('afdeling-filter').value;
+
+        let currentPloegFilter = '';
+        let currentAfdelingFilter = '';
+
+        function filterByPloeg(ploeg) {
+            currentPloegFilter = ploeg;
             
+            // Update button states
+            document.querySelectorAll('#ploeg-buttons .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((ploeg === '' && btn.textContent === 'Alle ploegen') || btn.textContent === ploeg) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            applyFilters();
+        }
+
+        function filterByAfdeling(afdeling) {
+            currentAfdelingFilter = afdeling;
+            
+            // Update button states
+            document.querySelectorAll('#afdeling-buttons .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((afdeling === '' && btn.textContent === 'Alle afdelingen') || btn.textContent === afdeling) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            applyFilters();
+        }
+
+        function applyFilters() {
             planningData = allPlanningData.filter(emp => {
                 let matches = true;
                 
                 // Filter op ploeg
-                if (selectedPloeg && (emp.Ploeg || emp.ploeg) !== selectedPloeg) {
+                if (currentPloegFilter && (emp.Ploeg || emp.ploeg) !== currentPloegFilter) {
                     matches = false;
                 }
                 
                 // Filter op afdeling
-                if (selectedAfdeling && (emp.Afdeling || emp.afdeling) !== selectedAfdeling) {
+                if (currentAfdelingFilter && (emp.Afdeling || emp.afdeling) !== currentAfdelingFilter) {
                     matches = false;
                 }
                 
                 return matches;
             });
             
-            console.log(`Gefilterd op ploeg "${selectedPloeg}" en afdeling "${selectedAfdeling}":`, planningData.length, 'medewerkers');
+            console.log(`Gefilterd op ploeg "${currentPloegFilter}" en afdeling "${currentAfdelingFilter}":`, planningData.length, 'medewerkers');
             
             displayPlanningTable();
             updatePlanningInfo();
         }
-        
+
         function updatePlanningInfo() {
             const planningInfo = document.getElementById('planning-info');
-            const selectedPloeg = document.getElementById('ploeg-filter').value;
-            const selectedAfdeling = document.getElementById('afdeling-filter').value;
             
             let infoText = `${planningData.length} medewerkers`;
             
             const filters = [];
-            if (selectedPloeg) filters.push(`ploeg: ${selectedPloeg}`);
-            if (selectedAfdeling) filters.push(`afdeling: ${selectedAfdeling}`);
+            if (currentPloegFilter) filters.push(`ploeg: ${currentPloegFilter}`);
+            if (currentAfdelingFilter) filters.push(`afdeling: ${currentAfdelingFilter}`);
             
             if (filters.length > 0) {
                 infoText += ` (${filters.join(', ')})`;
@@ -1502,6 +1694,38 @@
                     const cell = document.createElement('td');
                     let cellData = emp[col] || '';
                     
+                    // Check if this is the naam kolom
+                    const isNameColumn = col.toLowerCase().includes('naam') || col.toLowerCase() === 'naam' || 
+                                       col.toLowerCase() === 'name' || col.toLowerCase() === 'werknemer';
+                    
+                    if (isNameColumn) {
+                        // Maak de naam klikbaar voor urenregistratie
+                        const employeeName = cellData;
+                        cell.style.cursor = 'pointer';
+                        cell.style.transition = 'all 0.2s';
+                        cell.style.fontWeight = '600';
+                        cell.style.color = '#0063ac';
+                        cell.style.padding = '15px 12px';
+                        cell.className = 'clickable-name-cell';
+                        
+                        cell.onclick = () => startUrenRegistratie(employeeName);
+                        
+                        // Hover effect
+                        cell.onmouseover = () => {
+                            cell.style.backgroundColor = '#007bff';
+                            cell.style.color = 'white';
+                            cell.style.transform = 'scale(1.02)';
+                        };
+                        cell.onmouseout = () => {
+                            cell.style.backgroundColor = 'transparent';
+                            cell.style.color = '#0063ac';
+                            cell.style.transform = 'scale(1)';
+                        };
+                        
+                        // Tooltip
+                        cell.title = `Klik om uren in te voeren voor ${employeeName}`;
+                    }
+                    
                     // Format tijd cellen
                     if (col.includes('begin') || col.includes('einde')) {
                         cellData = formatTime(cellData);
@@ -1511,7 +1735,7 @@
                     cell.textContent = cellData;
                     row.appendChild(cell);
                     
-                    // Voeg werkelijke uren cel toe na elke geplande uren kolom ("plan")
+                    // Voeg werkelijke uren cel toe na elke geplande uren kolom ("plan") - nu NIET klikbaar
                     if (col.includes('plan')) {
                         const werkelijkCell = document.createElement('td');
                         
@@ -1526,6 +1750,7 @@
                         // Haal werkelijke uren op voor deze werknemer en dag
                         const werkelijkeUren = getWerkelijkeUren(emp.Naam || emp.naam, dag);
                         
+                        // Gewoon de uren tonen, geen klik functionaliteit
                         werkelijkCell.textContent = werkelijkeUren > 0 ? werkelijkeUren.toFixed(2) : '-';
                         
                         if (werkelijkeUren > 0) {
@@ -1542,8 +1767,9 @@
             
             updatePlanningInfo();
             
-            // Show table
+            // Show table and hide no-planning message
             document.getElementById('planning-display').style.display = 'block';
+            document.getElementById('no-planning-message').style.display = 'none';
         }
         
         function getWerkelijkeUren(employeeName, dag) {
@@ -1600,7 +1826,420 @@
             return totalHours;
         }
         
-        // Update de planning tabel wanneer er nieuwe registraties zijn
+        // Nieuwe functie: Start urenregistratie vanuit planning in modal
+        function startUrenRegistratie(employeeName) {
+            console.log(`Start urenregistratie voor ${employeeName} in modal`);
+            
+            // Stel de geselecteerde werknemer in
+            currentEmployee = employeeName;
+            currentWorkLine = null;
+            multiWorkLineData = {};
+            
+            // Laad bestaande registraties voor vandaag
+            loadExistingRegistrationsForToday(employeeName);
+            
+            // Update modal titel
+            document.getElementById('hours-modal-title').textContent = `Urenregistratie voor ${employeeName}`;
+            
+            // Reset modal state
+            document.getElementById('modal-workline-selection').classList.remove('hidden');
+            document.getElementById('modal-hours-registration').classList.add('hidden');
+            document.getElementById('modal-total-overview').classList.add('hidden');
+            
+            // Reset en update werklijnselecties in modal
+            updateWorklineButtonsWithExistingHours();
+            
+            // Toon modal
+            document.getElementById('hours-modal').classList.add('show');
+            
+            // Toon status bericht
+            const existingHours = getTotalHoursForToday(employeeName);
+            if (existingHours > 0) {
+                showStatus(`Bestaande registratie geladen voor ${employeeName} (${existingHours.toFixed(2)}u vandaag)`, 'success');
+            } else {
+                showStatus(`Nieuwe urenregistratie voor ${employeeName}`, 'success');
+            }
+        }
+
+        // Nieuwe functie: Update werklijnsknoppen met bestaande uren
+        function updateWorklineButtonsWithExistingHours() {
+            document.querySelectorAll('#modal-workline-grid .workline-btn').forEach(btn => {
+                btn.classList.remove('selected', 'has-hours');
+                
+                // Check of er uren zijn voor deze werklijn
+                const workLineKey = btn.onclick.toString().match(/'([^']+)'/)[1];
+                if (multiWorkLineData[workLineKey] && Object.keys(multiWorkLineData[workLineKey]).length > 0) {
+                    const hoursForWorkLine = Object.values(multiWorkLineData[workLineKey]).reduce((sum, hours) => sum + hours, 0);
+                    btn.classList.add('has-hours');
+                    btn.innerHTML = `${workLines[workLineKey].name}<br><small>(${hoursForWorkLine.toFixed(2)}u)</small>`;
+                } else {
+                    btn.textContent = workLines[workLineKey].name;
+                }
+            });
+        }
+
+        // Nieuwe functie: Laad bestaande registraties voor vandaag
+        function loadExistingRegistrationsForToday(employeeName) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Zoek alle registraties voor deze werknemer vandaag
+            const todayRegistrations = registrations.filter(reg => 
+                reg.employee === employeeName && reg.date === today
+            );
+            
+            console.log(`Gevonden ${todayRegistrations.length} registraties voor ${employeeName} op ${today}:`, todayRegistrations);
+            
+            // Reset multiWorkLineData
+            multiWorkLineData = {};
+            
+            // Combineer alle registraties in multiWorkLineData
+            todayRegistrations.forEach(reg => {
+                if (reg.hours && typeof reg.hours === 'object') {
+                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                        // Nieuwe format (object met werklijnen als keys)
+                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                            if (!multiWorkLineData[workLineKey]) {
+                                multiWorkLineData[workLineKey] = {};
+                            }
+                            
+                            Object.entries(activities).forEach(([activity, hours]) => {
+                                // Voeg uren toe (of overschrijf als het dezelfde activiteit is)
+                                if (multiWorkLineData[workLineKey][activity]) {
+                                    multiWorkLineData[workLineKey][activity] += parseFloat(hours);
+                                } else {
+                                    multiWorkLineData[workLineKey][activity] = parseFloat(hours);
+                                }
+                            });
+                        });
+                    } else if (reg.workLineName) {
+                        // Oude format - converteer naar nieuwe format
+                        const workLineKey = Object.keys(workLines).find(key => workLines[key].name === reg.workLineName);
+                        if (workLineKey) {
+                            if (!multiWorkLineData[workLineKey]) {
+                                multiWorkLineData[workLineKey] = {};
+                            }
+                            
+                            Object.entries(reg.hours).forEach(([activity, hours]) => {
+                                if (multiWorkLineData[workLineKey][activity]) {
+                                    multiWorkLineData[workLineKey][activity] += parseFloat(hours);
+                                } else {
+                                    multiWorkLineData[workLineKey][activity] = parseFloat(hours);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+            
+            console.log('Gecombineerde multiWorkLineData:', multiWorkLineData);
+        }
+
+        // Nieuwe functie: Krijg totaal uren voor vandaag
+        function getTotalHoursForToday(employeeName) {
+            const today = new Date().toISOString().split('T')[0];
+            let totalHours = 0;
+            
+            registrations.forEach(reg => {
+                if (reg.employee === employeeName && reg.date === today) {
+                    if (reg.hours && typeof reg.hours === 'object') {
+                        if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                            // Nieuwe format
+                            Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                                Object.values(activities).forEach(hours => {
+                                    totalHours += parseFloat(hours) || 0;
+                                });
+                            });
+                        } else {
+                            // Oude format
+                            Object.values(reg.hours).forEach(hours => {
+                                totalHours += parseFloat(hours) || 0;
+                            });
+                        }
+                    }
+                }
+            });
+            
+            return totalHours;
+        }
+
+        function closeHoursModal() {
+            document.getElementById('hours-modal').classList.remove('show');
+            
+            // Reset state
+            currentEmployee = null;
+            currentWorkLine = null;
+            multiWorkLineData = {};
+        }
+
+        function selectWorkLineInModal(workLineKey) {
+            console.log('selectWorkLineInModal called:', workLineKey);
+            
+            if (currentWorkLine) {
+                saveCurrentWorkLineDataInModal();
+            }
+            
+            document.querySelectorAll('#modal-workline-grid .workline-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            currentWorkLine = workLineKey;
+            
+            const workLine = workLines[workLineKey];
+            document.getElementById('modal-hours-registration').classList.remove('hidden');
+            document.getElementById('modal-total-overview').classList.remove('hidden');
+            
+            generateActivitiesTableInModal(workLine.activities);
+            loadWorkLineDataInModal(workLineKey);
+            updateTotalOverviewInModal();
+            
+            // Toon bericht als er al uren zijn voor deze afdeling
+            if (multiWorkLineData[workLineKey] && Object.keys(multiWorkLineData[workLineKey]).length > 0) {
+                const existingHours = Object.values(multiWorkLineData[workLineKey]).reduce((sum, hours) => sum + hours, 0);
+                showStatus(`Bestaande uren geladen voor ${workLine.name}: ${existingHours.toFixed(2)}u`, 'success');
+            }
+        }
+
+        function saveCurrentWorkLineDataInModal() {
+            if (!currentWorkLine) return;
+            
+            const activities = workLines[currentWorkLine].activities;
+            const workLineData = {};
+            
+            activities.forEach(activity => {
+                const inputId = 'modal-' + activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
+                const input = document.getElementById(inputId);
+                if (input && input.value && input.value !== '0') {
+                    const hours = parseFloat(input.value);
+                    if (hours > 0) {
+                        let activityName = activity;
+                        if (activity.toLowerCase() === 'overig') {
+                            const descriptionInput = document.getElementById(inputId + '-description');
+                            if (descriptionInput && descriptionInput.value.trim()) {
+                                activityName = `Overig: ${descriptionInput.value.trim()}`;
+                            }
+                        }
+                        workLineData[activityName] = hours;
+                    }
+                }
+            });
+            
+            if (Object.keys(workLineData).length > 0) {
+                multiWorkLineData[currentWorkLine] = workLineData;
+            } else {
+                delete multiWorkLineData[currentWorkLine];
+            }
+        }
+
+        function loadWorkLineDataInModal(workLineKey) {
+            const activities = workLines[workLineKey].activities;
+            
+            activities.forEach(activity => {
+                const inputId = 'modal-' + activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
+                const input = document.getElementById(inputId);
+                if (input) {
+                    let savedHours = 0;
+                    let savedDescription = '';
+                    
+                    if (multiWorkLineData[workLineKey]) {
+                        if (multiWorkLineData[workLineKey][activity]) {
+                            savedHours = multiWorkLineData[workLineKey][activity];
+                        } else if (activity.toLowerCase() === 'overig') {
+                            for (let key in multiWorkLineData[workLineKey]) {
+                                if (key.startsWith('Overig:')) {
+                                    savedHours = multiWorkLineData[workLineKey][key];
+                                    savedDescription = key.substring(7).trim();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    input.value = savedHours;
+                    
+                    if (activity.toLowerCase() === 'overig' && savedDescription) {
+                        const descriptionInput = document.getElementById(inputId + '-description');
+                        if (descriptionInput) {
+                            descriptionInput.value = savedDescription;
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTotalOverviewInModal() {
+            const overviewEl = document.getElementById('modal-total-overview');
+            const totalsEl = document.getElementById('modal-workline-totals');
+            
+            if (currentWorkLine) {
+                saveCurrentWorkLineDataInModal();
+            }
+            
+            totalsEl.innerHTML = '';
+            
+            let grandTotal = 0;
+            
+            Object.entries(multiWorkLineData).forEach(([workLineKey, activities]) => {
+                const workLineName = workLines[workLineKey].name;
+                const workLineTotal = Object.values(activities).reduce((sum, hours) => sum + hours, 0);
+                grandTotal += workLineTotal;
+                
+                const workLineDiv = document.createElement('div');
+                workLineDiv.className = 'workline-total';
+                workLineDiv.innerHTML = `
+                    <div class="name">${workLineName}</div>
+                    <div class="hours">${workLineTotal.toFixed(2)}u</div>
+                `;
+                totalsEl.appendChild(workLineDiv);
+            });
+            
+            const grandTotalDiv = document.createElement('div');
+            grandTotalDiv.className = grandTotal > 8 ? 'grand-total warning' : 'grand-total';
+            grandTotalDiv.innerHTML = `
+                <div class="name">TOTAAL</div>
+                <div class="hours">${grandTotal.toFixed(2)}u</div>
+            `;
+            totalsEl.appendChild(grandTotalDiv);
+            
+            if (currentWorkLine) {
+                overviewEl.classList.remove('hidden');
+            } else {
+                overviewEl.classList.add('hidden');
+            }
+        }
+
+        function generateActivitiesTableInModal(activities) {
+            const tbody = document.getElementById('modal-activities-tbody');
+            tbody.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const activityId = 'modal-' + activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
+                const row = document.createElement('tr');
+                
+                const isOverig = activity.toLowerCase() === 'overig';
+                const activityDisplay = isOverig ? 
+                    `<input type="text" placeholder="Overig, Namelijk:" id="${activityId}-description" 
+                     class="overig-description">` : 
+                    activity;
+                
+                row.innerHTML = `
+                    <td>${activityDisplay}</td>
+                    <td>
+                        <div class="hour-controls">
+                            <button class="btn-fullday" onclick="setFullDayInModal('${activityId}')">Hele dag</button>
+                            <div class="hour-buttons-group">
+                                <button class="hour-btn minus" onclick="changeHoursInModal('${activityId}', -1)">-1</button>
+                                <button class="hour-btn minus" onclick="changeHoursInModal('${activityId}', -0.25)">-0,25</button>
+                                <input type="number" class="hour-input" id="${activityId}" min="0" max="12" step="0.25" value="0" readonly>
+                                <button class="hour-btn plus" onclick="changeHoursInModal('${activityId}', 0.25)">+0,25</button>
+                                <button class="hour-btn plus" onclick="changeHoursInModal('${activityId}', 1)">+1</button>
+                                <button class="hour-btn plus" onclick="changeHoursInModal('${activityId}', 4)">+4</button>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn-clear" onclick="clearHoursInModal('${activityId}')">Wis</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function changeHoursInModal(inputId, change) {
+            const input = document.getElementById(inputId);
+            const currentValue = parseFloat(input.value) || 0;
+            const newValue = Math.max(0, Math.min(12, currentValue + change));
+            input.value = newValue;
+            updateTotalOverviewInModal();
+        }
+
+        function setFullDayInModal(inputId) {
+            clearAllHoursInModal();
+            document.getElementById(inputId).value = '7.5';
+            updateTotalOverviewInModal();
+        }
+
+        function clearHoursInModal(inputId) {
+            document.getElementById(inputId).value = '0';
+            updateTotalOverviewInModal();
+        }
+
+        function clearAllHoursInModal() {
+            if (!currentWorkLine) return;
+            
+            const activities = workLines[currentWorkLine].activities;
+            activities.forEach(activity => {
+                const inputId = 'modal-' + activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = '0';
+                }
+            });
+        }
+
+        async function saveRegistrationFromModal() {
+            if (!currentEmployee) {
+                showStatus('Geen werknemer geselecteerd', 'error');
+                return;
+            }
+            
+            saveCurrentWorkLineDataInModal();
+            
+            if (Object.keys(multiWorkLineData).length === 0) {
+                showStatus('Voer minimaal één activiteit in', 'error');
+                return;
+            }
+            
+            let totalHours = 0;
+            const workLineNames = [];
+            
+            Object.entries(multiWorkLineData).forEach(([workLineKey, activities]) => {
+                workLineNames.push(workLines[workLineKey].name);
+                Object.values(activities).forEach(hours => {
+                    totalHours += hours;
+                });
+            });
+            
+            const today = new Date().toISOString().split('T')[0];
+            const currentTime = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+            
+            // Verwijder ALLE bestaande registraties voor deze werknemer vandaag
+            registrations = registrations.filter(reg => 
+                !(reg.employee === currentEmployee && reg.date === today)
+            );
+            
+            // Voeg de nieuwe gecombineerde registratie toe
+            const registration = {
+                employee: currentEmployee,
+                workLineNames: workLineNames,
+                date: today,
+                time: currentTime,
+                hours: multiWorkLineData,
+                total: totalHours
+            };
+            
+            registrations.unshift(registration);
+            localStorage.setItem('sousvide_registrations', JSON.stringify(registrations));
+            
+            console.log('Opgeslagen registratie:', registration);
+            console.log('CurrentEmployee bij opslaan:', currentEmployee);
+            
+            if (account) {
+                await intelligentUpload();
+            } else {
+                showStatus('⚠️ Opgeslagen lokaal - login voor automatische upload', 'error');
+            }
+            
+            // Bewaar de werknemernaam voor de status melding voordat we de modal sluiten
+            const employeeName = currentEmployee;
+            
+            // Sluit modal
+            closeHoursModal();
+            
+            updateDataPreview();
+            
+            // Update planning tabel als deze zichtbaar is
+            updatePlanningWithNewRegistration();
+            
+            showStatus(`✅ Uren bijgewerkt voor ${employeeName} (${totalHours.toFixed(2)}u totaal)!`, 'success');
+        }
         function updatePlanningWithNewRegistration() {
             if (planningData.length > 0) {
                 console.log('Update planning tabel met nieuwe registratie');
@@ -1641,10 +2280,16 @@
             planningData = [];
             allPlanningData = [];
             planningHeader = [];
+            currentPloegFilter = '';
+            currentAfdelingFilter = '';
+            
             document.getElementById('planning-display').style.display = 'none';
             document.getElementById('planning-file').value = '';
-            document.getElementById('ploeg-filter').innerHTML = '<option value="">Alle ploegen</option>';
-            document.getElementById('afdeling-filter').innerHTML = '<option value="">Alle afdelingen</option>';
+            
+            // Reset filter buttons
+            document.getElementById('ploeg-buttons').innerHTML = '<button class="filter-btn active" onclick="filterByPloeg(\'\')">Alle ploegen</button>';
+            document.getElementById('afdeling-buttons').innerHTML = '<button class="filter-btn active" onclick="filterByAfdeling(\'\')">Alle afdelingen</button>';
+            
             showStatus('Personeelsplanning gewist', 'success');
         }
 
@@ -1956,7 +2601,7 @@
             if (account) {
                 if (signInBtn) signInBtn.style.display = 'none';
                 if (signOutBtn) signOutBtn.style.display = 'block';
-                if (userInfo) userInfo.textContent = `Ingelogd: ${account.name || account.username}`;
+                if (userInfo) userInfo.textContent = account.name || account.username;
             } else {
                 if (signInBtn) signInBtn.style.display = 'block';
                 if (signOutBtn) signOutBtn.style.display = 'none';
@@ -2050,9 +2695,14 @@
         }
 
         window.onclick = function(event) {
-            const modal = document.getElementById('employee-modal');
-            if (event.target === modal) {
+            const employeeModal = document.getElementById('employee-modal');
+            const hoursModal = document.getElementById('hours-modal');
+            
+            if (event.target === employeeModal) {
                 closeEmployeeModal();
+            }
+            if (event.target === hoursModal) {
+                closeHoursModal();
             }
         }
 
@@ -2449,12 +3099,6 @@
         function updateDataPreview() {
             const today = new Date().toISOString().split('T')[0];
             
-            const departments = ['schillijn', 'inpakken', 'sousvide', 'koelcel', 'fusthal', 'puree'];
-            departments.forEach(dept => {
-                const preview = document.getElementById(`${dept}-preview`);
-                if (preview) preview.textContent = 'Nog geen registraties';
-            });
-            
             const employeeTotalsPreview = document.getElementById('employee-totals-preview');
             if (employeeTotalsPreview) employeeTotalsPreview.textContent = 'Nog geen registraties';
             
@@ -2471,15 +3115,6 @@
                 return timeB.localeCompare(timeA);
             });
             
-            const departmentData = {
-                schillijn: [],
-                inpakken: [],
-                sousvide: [],
-                koelcel: [],
-                fusthal: [],
-                puree: []
-            };
-            
             const employeeTotals = {};
             
             sortedRegistrations.forEach(reg => {
@@ -2489,48 +3124,28 @@
                 
                 if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
                     Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                        if (departments.includes(workLineKey)) {
-                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                            
-                            Object.entries(activities).forEach(([activity, hours]) => {
-                                departmentData[workLineKey].push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
-                                
-                                if (isToday) {
-                                    if (!employeeTotals[reg.employee]) {
-                                        employeeTotals[reg.employee] = { totalHours: 0, details: [] };
-                                    }
-                                    employeeTotals[reg.employee].totalHours += hours;
-                                    employeeTotals[reg.employee].details.push(`${workLineName}: ${activity} (${hours}u)`);
-                                }
-                            });
-                        }
-                    });
-                } else if (reg.workLineName) {
-                    const workLineKey = Object.keys(workLines).find(key => workLines[key].name === reg.workLineName);
-                    if (workLineKey && departments.includes(workLineKey)) {
-                        Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            departmentData[workLineKey].push(`${reg.time || 'Onbekend'} ; ${reg.employee} ; ${reg.date || 'Onbekend'} ; ${activity} ; ${hours}u`);
-                            
+                        const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                        
+                        Object.entries(activities).forEach(([activity, hours]) => {
                             if (isToday) {
                                 if (!employeeTotals[reg.employee]) {
                                     employeeTotals[reg.employee] = { totalHours: 0, details: [] };
                                 }
                                 employeeTotals[reg.employee].totalHours += hours;
-                                employeeTotals[reg.employee].details.push(`${reg.workLineName}: ${activity} (${hours}u)`);
+                                employeeTotals[reg.employee].details.push(`${workLineName}: ${activity} (${hours}u)`);
                             }
                         });
-                    }
-                }
-            });
-            
-            Object.entries(departmentData).forEach(([deptKey, lines]) => {
-                const preview = document.getElementById(`${deptKey}-preview`);
-                if (preview) {
-                    if (lines.length > 0) {
-                        preview.textContent = lines.join('\n');
-                    } else {
-                        preview.textContent = 'Nog geen registraties';
-                    }
+                    });
+                } else if (reg.workLineName) {
+                    Object.entries(reg.hours).forEach(([activity, hours]) => {
+                        if (isToday) {
+                            if (!employeeTotals[reg.employee]) {
+                                employeeTotals[reg.employee] = { totalHours: 0, details: [] };
+                            }
+                            employeeTotals[reg.employee].totalHours += hours;
+                            employeeTotals[reg.employee].details.push(`${reg.workLineName}: ${activity} (${hours}u)`);
+                        }
+                    });
                 }
             });
             
