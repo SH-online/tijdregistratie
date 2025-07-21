@@ -2356,7 +2356,71 @@
             // This function is no longer needed since we removed the data preview
         }
 
-        async function sendData() {
+        // Auto-upload functionality for reliability
+        let uploadQueue = [];
+        let isUploading = false;
+        let lastUploadAttempt = null;
+
+        // Check for unsent data and auto-upload periodically
+        function initializeAutoUpload() {
+            // Try to upload every 10 minutes
+            setInterval(checkAndAutoUpload, 10 * 60 * 1000);
+            
+            // Also check on page load
+            setTimeout(checkAndAutoUpload, 5000); // Wait 5 seconds after load
+            
+            // Upload before page unload
+            window.addEventListener('beforeunload', function(e) {
+                if (hasUnsentData()) {
+                    sendDataReliable();
+                    e.preventDefault();
+                    e.returnValue = 'Er zijn nog niet-verstuurde gegevens. Weet je zeker dat je de pagina wilt verlaten?';
+                    return e.returnValue;
+                }
+            });
+        }
+
+        function hasUnsentData() {
+            if (!registrations || registrations.length === 0) return false;
+            
+            // Check if we have data from today that hasn't been uploaded recently
+            const today = new Date().toISOString().split('T')[0];
+            const hasDataFromToday = registrations.some(reg => reg.date === today);
+            
+            if (!hasDataFromToday) return false;
+            
+            // Check last upload time
+            const lastUpload = localStorage.getItem('last_successful_upload');
+            if (!lastUpload) return true;
+            
+            const lastUploadTime = new Date(lastUpload);
+            const now = new Date();
+            const hoursSinceUpload = (now - lastUploadTime) / (1000 * 60 * 60);
+            
+            // If more than 4 hours since last upload and we have today's data, consider unsent
+            return hoursSinceUpload > 4;
+        }
+
+        async function checkAndAutoUpload() {
+            if (isUploading) return;
+            
+            if (!account) {
+                console.log('Auto-upload skipped: not logged in');
+                return;
+            }
+            
+            if (hasUnsentData()) {
+                console.log('Auto-upload triggered: unsent data detected');
+                await sendDataReliable();
+            }
+        }
+
+        async function sendDataReliable() {
+            if (isUploading) {
+                showStatus('Upload al bezig...', 'error');
+                return;
+            }
+            
             if (!registrations || registrations.length === 0) {
                 showStatus('Geen data om te versturen', 'error');
                 return;
@@ -2367,52 +2431,62 @@
                 return;
             }
 
-            try {
-                showStatus('Gegevens versturen...', 'success');
+            isUploading = true;
+            let attempt = 1;
+            const maxAttempts = 5;
+            
+            while (attempt <= maxAttempts) {
+                try {
+                    showStatus(`Gegevens versturen... (poging ${attempt}/${maxAttempts})`, 'success');
 
-                // Get access token for Microsoft Graph API
-                const tokenRequest = {
-                    scopes: ['Files.ReadWrite'],
-                    account: account
-                };
-
-                const tokenResponse = await msalInstance.acquireTokenSilent(tokenRequest);
-                const accessToken = tokenResponse.accessToken;
-
-                // Prepare CSV data
-                let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
-                
-                registrations.forEach(reg => {
-                    if (reg.hours && typeof reg.hours === 'object') {
-                        if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                            Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                                const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                                Object.entries(activities).forEach(([activity, hours]) => {
-                                    csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                                });
-                            });
+                    // Get access token with retry logic
+                    let tokenResponse;
+                    try {
+                        const tokenRequest = {
+                            scopes: ['Files.ReadWrite'],
+                            account: account
+                        };
+                        tokenResponse = await msalInstance.acquireTokenSilent(tokenRequest);
+                    } catch (tokenError) {
+                        if (tokenError.message.includes('interaction_required')) {
+                            tokenResponse = await msalInstance.acquireTokenPopup(tokenRequest);
                         } else {
-                            Object.entries(reg.hours).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                            });
+                            throw tokenError;
                         }
                     }
-                });
 
-                // Create filename with timestamp
-                const now = new Date();
-                const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
-                const filename = `tijdregistratie_${timestamp}.csv`;
+                    const accessToken = tokenResponse.accessToken;
 
-                // Convert to base64
-                const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const reader = new FileReader();
-                
-                reader.onload = async function() {
-                    const base64Data = reader.result.split(',')[1];
+                    // Prepare CSV data
+                    let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
                     
-                    // Upload to OneDrive Autouploads folder
+                    registrations.forEach(reg => {
+                        if (reg.hours && typeof reg.hours === 'object') {
+                            if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                                Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                                    const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                                    Object.entries(activities).forEach(([activity, hours]) => {
+                                        csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+                                    });
+                                });
+                            } else {
+                                Object.entries(reg.hours).forEach(([activity, hours]) => {
+                                    csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+                                });
+                            }
+                        }
+                    });
+
+                    // Create filename with timestamp
+                    const now = new Date();
+                    const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
+                    const filename = `tijdregistratie_${timestamp}.csv`;
+
+                    // Upload to OneDrive with timeout
                     const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/Autouploads/${filename}:/content`;
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
                     
                     const uploadResponse = await fetch(uploadUrl, {
                         method: 'PUT',
@@ -2420,41 +2494,57 @@
                             'Authorization': `Bearer ${accessToken}`,
                             'Content-Type': 'text/csv'
                         },
-                        body: csvContent
+                        body: csvContent,
+                        signal: controller.signal
                     });
+
+                    clearTimeout(timeoutId);
 
                     if (uploadResponse.ok) {
                         const result = await uploadResponse.json();
-                        showStatus(`✅ Gegevens succesvol verstuurd naar OneDrive/Autouploads als ${filename}`, 'success');
                         
-                        // Optional: Clear local data after successful upload
-                        // if (confirm('Gegevens zijn verstuurd. Lokale data wissen?')) {
-                        //     registrations = [];
-                        //     localStorage.removeItem('sousvide_registrations');
-                        // }
+                        // Mark as successfully uploaded
+                        localStorage.setItem('last_successful_upload', now.toISOString());
+                        localStorage.setItem('last_upload_filename', filename);
+                        
+                        showStatus(`✅ Gegevens succesvol verstuurd naar OneDrive/Autouploads als ${filename}`, 'success');
+                        isUploading = false;
+                        return; // Success, exit retry loop
                         
                     } else {
                         throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
                     }
-                };
-                
-                reader.readAsDataURL(csvBlob);
 
-            } catch (error) {
-                console.error('Send data error:', error);
-                if (error.message.includes('interaction_required')) {
-                    // Token expired, try interactive login
-                    try {
-                        await msalInstance.acquireTokenPopup(tokenRequest);
-                        // Retry sending data
-                        setTimeout(() => sendData(), 1000);
-                    } catch (loginError) {
-                        showStatus('Inloggen mislukt. Probeer opnieuw in te loggen.', 'error');
+                } catch (error) {
+                    console.error(`Upload attempt ${attempt} failed:`, error);
+                    
+                    if (attempt === maxAttempts) {
+                        // Final attempt failed
+                        showStatus(`❌ Upload mislukt na ${maxAttempts} pogingen. Probeer later opnieuw of controleer internetverbinding.`, 'error');
+                        
+                        // Store failed attempt info
+                        localStorage.setItem('last_failed_upload', new Date().toISOString());
+                        localStorage.setItem('failed_upload_data', JSON.stringify(registrations));
+                        
+                        isUploading = false;
+                        return;
                     }
-                } else {
-                    showStatus('Fout bij versturen gegevens: ' + error.message, 'error');
+                    
+                    // Wait before retry (exponential backoff)
+                    const waitTime = Math.min(1000 * Math.pow(2, attempt), 30000); // Max 30 seconds
+                    showStatus(`Upload mislukt, opnieuw proberen in ${Math.round(waitTime/1000)} seconden...`, 'error');
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                    
+                    attempt++;
                 }
             }
+            
+            isUploading = false;
+        }
+
+        // Replace the old sendData function
+        async function sendData() {
+            await sendDataReliable();
         }
 
         function downloadCSV() {
@@ -2600,6 +2690,7 @@
             initializeDates();
             loadData();
             checkExistingLogin(); // Check if user is already logged in
+            initializeAutoUpload(); // Initialize bullet-proof upload system
         });
     </script>
 </body>
