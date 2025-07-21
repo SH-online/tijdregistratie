@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 95vw; /* Gebruik bijna de volledige scherm breedte */
+            max-width: 95vw;
             width: 100%;
             margin: 0 auto;
             background: white;
@@ -56,6 +56,38 @@
         .planning-upload-section {
             display: flex;
             align-items: center;
+            gap: 15px;
+        }
+
+        .btn-upload {
+            background: #0063ac;
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.2s;
+            min-height: 48px;
+            box-shadow: 0 2px 8px rgba(0,99,172,0.3);
+        }
+
+        .btn-upload:hover {
+            background: #004a85;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,99,172,0.4);
+        }
+
+        .file-name-display {
+            color: #495057;
+            font-size: 1.1em;
+            font-weight: 600;
+            padding: 12px 18px;
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            display: none;
         }
 
         #auth-buttons {
@@ -64,10 +96,103 @@
             gap: 15px;
         }
 
-        /* Zorg ervoor dat ALLE secties dezelfde styling hebben */
+        .date-selection-section {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 2px solid #0063ac;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .date-selection-section h3 {
+            color: #0063ac;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .current-week {
+            font-weight: 600;
+            color: #0063ac;
+            font-size: 1.1em;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .day-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .day-btn {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.2s;
+            min-height: 50px;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .day-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .day-btn.selected {
+            background: #fed500;
+            color: #1a1a1a;
+            border-color: #ffc107;
+            box-shadow: 0 2px 8px rgba(254,213,0,0.4);
+        }
+
+        .day-btn.today {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .day-btn.today.selected {
+            background: #fed500;
+            color: #1a1a1a;
+            border-color: #ffc107;
+        }
+
+        .day-btn.future {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .selected-date-display {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
         .section {
             margin-bottom: 30px;
-            width: 100%; /* Expliciete breedte */
+            width: 100%;
         }
 
         .section h2 {
@@ -77,7 +202,6 @@
             font-weight: 600;
         }
 
-        /* Uniforme knoppen voor beheer opties */
         .btn-uniform {
             background: #6c757d;
             color: white;
@@ -152,7 +276,6 @@
             white-space: nowrap;
         }
 
-        /* UNIFORME SECTIE STYLING - alle secties gebruiken deze class */
         .planning-section,
         .data-overview {
             background: #f8f9fa;
@@ -160,8 +283,8 @@
             border-radius: 12px;
             margin-bottom: 30px;
             border: 2px solid #dee2e6;
-            width: 100%; /* Zorgt voor consistente breedte */
-            box-sizing: border-box; /* Include padding en border in width */
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .planning-section h3,
@@ -216,7 +339,6 @@
             display: block;
         }
 
-        /* Nieuwe styling voor filter buttons */
         .filter-buttons {
             display: flex;
             flex-wrap: wrap;
@@ -317,7 +439,6 @@
             color: #6c757d;
         }
 
-        /* Styling voor klikbare naam cellen in de planning tabel */
         .planning-table td.clickable-name-cell {
             cursor: pointer !important;
             transition: all 0.2s ease;
@@ -335,23 +456,6 @@
             box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
             border: 2px solid #004085;
             z-index: 10;
-        }
-
-        /* Verwijder de oude klikbare cel styling */
-        .planning-table td.clickable-cell {
-            /* Verwijderd - niet meer nodig */
-        }
-
-        .planning-table td.clickable-cell:hover {
-            /* Verwijderd - niet meer nodig */
-        }
-
-        .planning-table td.clickable-cell.empty {
-            /* Verwijderd - niet meer nodig */
-        }
-
-        .planning-table td.clickable-cell.empty:hover {
-            /* Verwijderd - niet meer nodig */
         }
 
         .modal {
@@ -383,40 +487,9 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
-        /* Specifieke styling voor de uren modal */
         .hours-modal-content {
-            max-width: 1400px; /* Breder voor de afdelingen grid */
-            height: 90vh; /* Iets hoger */
-        }
-
-        .hours-modal-content .workline-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-            padding: 20px;
-            border: 2px solid #dee2e6;
-            border-radius: 12px;
-            background: #f8f9fa;
-        }
-
-        /* Responsive voor modal workline grid */
-        @media (max-width: 1200px) {
-            .hours-modal-content .workline-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        @media (max-width: 800px) {
-            .hours-modal-content .workline-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 500px) {
-            .hours-modal-content .workline-grid {
-                grid-template-columns: 1fr;
-            }
+            max-width: 1400px;
+            height: 90vh;
         }
 
         .modal-header {
@@ -455,20 +528,6 @@
             transform: scale(1.05);
         }
 
-        /* TABLET OPTIMIZED GRIDS */
-        .employee-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 12px;
-            margin-bottom: 25px;
-            padding: 20px;
-            border: 2px solid #dee2e6;
-            border-radius: 12px;
-            background: #f8f9fa;
-            width: 100%; /* Voeg expliciete breedte toe */
-            box-sizing: border-box;
-        }
-
         .workline-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -478,45 +537,8 @@
             border: 2px solid #dee2e6;
             border-radius: 12px;
             background: #f8f9fa;
-            width: 100%; /* Voeg expliciete breedte toe */
+            width: 100%;
             box-sizing: border-box;
-        }
-
-        .employee-btn {
-            padding: 18px 12px;
-            background: #0063ac;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1em;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            min-height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .employee-btn:hover {
-            background: #004a85;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,99,172,0.3);
-        }
-
-        .employee-btn:active {
-            transform: translateY(0);
-        }
-
-        .employee-btn.selected {
-            background: #fed500;
-            color: #1a1a1a;
-            box-shadow: 0 4px 15px rgba(254,213,0,0.4);
-            font-weight: 600;
         }
 
         .workline-btn {
@@ -548,7 +570,6 @@
             box-shadow: 0 6px 25px rgba(254,213,0,0.4);
         }
 
-        /* Styling voor knoppen met bestaande uren */
         .workline-btn.has-hours {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
@@ -571,6 +592,52 @@
             font-size: 0.8em;
             opacity: 0.9;
             font-weight: 500;
+        }
+
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            background: #f8f9fa;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .employee-btn {
+            padding: 18px 12px;
+            background: #0063ac;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .employee-btn:hover {
+            background: #004a85;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,99,172,0.3);
+        }
+
+        .employee-btn.selected {
+            background: #fed500;
+            color: #1a1a1a;
+            box-shadow: 0 4px 15px rgba(254,213,0,0.4);
+            font-weight: 600;
         }
 
         .add-employee-row {
@@ -654,7 +721,6 @@
             transform: translateY(-1px);
         }
 
-        /* TABLET OPTIMIZED TABLE */
         .activities-table {
             width: 100%;
             border-collapse: separate;
@@ -689,7 +755,6 @@
             border-bottom: none;
         }
 
-        /* TABLET OPTIMIZED HOUR CONTROLS */
         .hour-controls {
             display: flex;
             align-items: center;
@@ -727,10 +792,6 @@
             transform: translateY(-1px);
         }
 
-        .hour-btn:active {
-            transform: scale(0.95);
-        }
-
         .hour-btn.minus {
             color: #dc3545;
             border-color: #dc3545;
@@ -760,8 +821,6 @@
             font-size: 1.3em;
             font-weight: 600;
             background: #fff;
-            -webkit-appearance: none;
-            -moz-appearance: textfield;
             min-height: 65px;
         }
 
@@ -771,16 +830,13 @@
             box-shadow: 0 0 0 3px rgba(0,99,172,0.1);
         }
 
-        .hour-input::-webkit-outer-spin-button,
-        .hour-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
         .controls {
             text-align: center;
             margin-top: 30px;
-            width: 100%; /* Zorgt voor consistente breedte */
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
         }
 
         .btn {
@@ -816,16 +872,6 @@
 
         .btn-secondary:hover {
             background: #da190b;
-            transform: translateY(-1px);
-        }
-
-        .btn-download {
-            background: #FF9800;
-            color: white;
-        }
-
-        .btn-download:hover {
-            background: #F57C00;
             transform: translateY(-1px);
         }
 
@@ -866,18 +912,6 @@
             transform: translateY(-1px);
         }
 
-        .selected-employee {
-            background: linear-gradient(135deg, #e8f4fd, #d1ecf1);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            text-align: center;
-            font-size: 1.3em;
-            color: #0063ac;
-            font-weight: 600;
-            border: 2px solid #0063ac;
-        }
-
         .hidden {
             display: none;
         }
@@ -903,86 +937,13 @@
             border: 2px solid #f5c6cb;
         }
 
-        /* DEPARTMENTS ROW - fix voor gelijke breedte */
-        .departments-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-            width: 100%; /* Expliciete breedte */
-            box-sizing: border-box;
-        }
-
-        .department-overview {
-            margin-bottom: 0;
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            overflow: hidden;
-            background: white;
-            width: 100%; /* Zorgt voor gelijke breedte */
-            box-sizing: border-box;
-        }
-
-        .department-overview h4 {
-            background: #0063ac;
-            color: white;
-            margin: 0;
-            padding: 15px 20px;
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-
-        .department-overview pre {
-            background: #fff;
-            padding: 20px;
-            margin: 0;
-            border-radius: 0;
-            font-size: 0.95em;
-            overflow-x: auto;
-            max-height: 180px;
-            overflow-y: auto;
-            min-height: 80px;
-            line-height: 1.4;
-        }
-
-        .total-hours {
-            font-weight: 600;
-            color: #0063ac;
-            font-size: 1.2em;
-        }
-
-        .quick-fill {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
-        }
-
-        .quick-btn {
-            padding: 10px 18px;
-            background: #e9ecef;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 500;
-            transition: all 0.2s;
-            min-height: 44px;
-        }
-
-        .quick-btn:hover {
-            background: #adb5bd;
-            transform: translateY(-1px);
-        }
-
-        /* TABLET OPTIMIZED TOTAL OVERVIEW */
         .total-overview {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border-radius: 12px;
             padding: 20px;
             margin: 25px 0;
             border: 2px solid #dee2e6;
-            width: 100%; /* Expliciete breedte */
+            width: 100%;
             box-sizing: border-box;
         }
 
@@ -1051,7 +1012,44 @@
             color: #b71c1c;
         }
 
-        /* Responsive improvements voor kleinere tablets */
+        .all-registrations-overview {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            background: white;
+            overflow: hidden;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .all-registrations-overview pre {
+            background: #fff;
+            padding: 20px;
+            margin: 0;
+            border-radius: 0;
+            font-size: 0.9em;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+            min-height: 100px;
+            line-height: 1.4;
+        }
+
+        .overig-description {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1.3em;
+            background: #fff;
+        }
+
+        .overig-description:focus {
+            outline: none;
+            border-color: #0063ac;
+            box-shadow: 0 0 0 3px rgba(0,99,172,0.1);
+        }
+
         @media (max-width: 1100px) {
             .employee-grid {
                 grid-template-columns: repeat(6, 1fr);
@@ -1101,7 +1099,11 @@
             }
             
             .planning-upload-section {
-                order: -1; /* Zet upload sectie bovenaan op mobiel */
+                order: -1;
+            }
+
+            .day-buttons {
+                justify-content: center;
             }
         }
 
@@ -1113,32 +1115,13 @@
             .workline-grid {
                 grid-template-columns: 1fr;
             }
+
+            .day-btn {
+                min-width: 100px;
+                padding: 10px 12px;
+            }
         }
 
-        /* Styling voor alle registraties overzicht */
-        .all-registrations-overview {
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            background: white;
-            overflow: hidden;
-            width: 100%; /* Expliciete breedte */
-            box-sizing: border-box;
-        }
-
-        .all-registrations-overview pre {
-            background: #fff;
-            padding: 20px;
-            margin: 0;
-            border-radius: 0;
-            font-size: 0.9em;
-            overflow-x: auto;
-            max-height: 300px;
-            overflow-y: auto;
-            min-height: 100px;
-            line-height: 1.4;
-        }
-
-        /* Touch-friendly improvements */
         @media (hover: none) {
             .employee-btn:hover,
             .workline-btn:hover,
@@ -1149,29 +1132,6 @@
                 box-shadow: none;
             }
         }
-
-        /* Overig description input styling */
-        .overig-description {
-            width: 100%;
-            max-width: 300px;
-            padding: 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 1.3em;
-            background: #fff;
-        }
-
-        .overig-description:focus {
-            outline: none;
-            border-color: #0063ac;
-            box-shadow: 0 0 0 3px rgba(0,99,172,0.1);
-        }
-
-        /* EXTRA FIX: Zorg dat inline styles niet overrulen */
-        #workline-grid {
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
     </style>
 </head>
 <body>
@@ -1180,7 +1140,11 @@
             <h1>Tijdregistratie</h1>
             <div class="header-buttons">
                 <div class="planning-upload-section">
-                    <input type="file" id="planning-file" class="file-input" accept=".csv" onchange="loadPlanningCSV(event)">
+                    <input type="file" id="planning-file" class="file-input" accept=".csv" onchange="loadPlanningCSV(event)" style="display: none;">
+                    <button class="btn-upload" onclick="document.getElementById('planning-file').click()">
+                        📊 Planning laden
+                    </button>
+                    <span id="file-name-display" class="file-name-display"></span>
                 </div>
                 <div id="auth-buttons">
                     <span id="user-info" class="user-info"></span>
@@ -1194,7 +1158,8 @@
             </div>
         </div>
 
-        <!-- Personeelsplanning sectie -->
+
+
         <div class="section">
             <div class="planning-section">
                 <h3>📅 Personeelsplanning</h3>
@@ -1205,13 +1170,11 @@
                             <span id="planning-info"></span>
                         </div>
                         
-                        <!-- Filters -->
                         <div class="planning-filters">
                             <div class="planning-filter-group">
                                 <label class="planning-filter-label">Ploeg:</label>
                                 <div class="filter-buttons" id="ploeg-buttons">
                                     <button class="filter-btn active" onclick="filterByPloeg('')">Alle ploegen</button>
-                                    <!-- Wordt dynamisch gevuld -->
                                 </div>
                             </div>
                             
@@ -1219,13 +1182,11 @@
                                 <label class="planning-filter-label">Afdeling:</label>
                                 <div class="filter-buttons" id="afdeling-buttons">
                                     <button class="filter-btn active" onclick="filterByAfdeling('')">Alle afdelingen</button>
-                                    <!-- Wordt dynamisch gevuld -->
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- VOLLEDIG SCHERMVULLEND WRAPPER -->
                     <div class="planning-table-wrapper">
                         <table class="planning-table" id="planning-table">
                             <thead id="planning-head"></thead>
@@ -1234,14 +1195,12 @@
                     </div>
                 </div>
                 
-                <!-- Bericht wanneer geen planning geladen is -->
                 <div id="no-planning-message" style="text-align: center; padding: 40px; color: #6c757d; font-size: 1.2em;">
                     📊 Upload een personeelsplanning CSV bestand via de knop bovenaan om te beginnen
                 </div>
             </div>
         </div>
 
-        <!-- Modal voor urenregistratie -->
         <div class="modal" id="hours-modal">
             <div class="modal-content hours-modal-content">
                 <div class="modal-header">
@@ -1249,9 +1208,22 @@
                     <button class="btn-close" onclick="closeHoursModal()">&times;</button>
                 </div>
                 
-                <!-- Stap 1: Werklijn selecteren (nu in modal) -->
-                <div class="section" id="modal-workline-selection">
-                    <h3>1. Kies afdeling:</h3>
+                <div class="section" id="modal-date-selection">
+                    <h3>1. Selecteer datum voor registratie:</h3>
+                    
+                    <div class="date-selection-section">
+                        <div class="current-week" id="modal-current-week-display">
+                            <!-- Wordt dynamisch gevuld -->
+                        </div>
+                        
+                        <div class="day-buttons" id="modal-day-buttons">
+                            <!-- Wordt dynamisch gevuld met dagen van de week -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section hidden" id="modal-workline-selection">
+                    <h3>2. Kies afdeling:</h3>
                     <div id="modal-workline-grid" class="workline-grid">
                         <button class="workline-btn" onclick="selectWorkLineInModal('schillijn')">Schillijn</button>
                         <button class="workline-btn" onclick="selectWorkLineInModal('inpakken')">Inpakken</button>
@@ -1262,16 +1234,13 @@
                     </div>
                 </div>
 
-                <!-- Totaal overzicht van alle werklijnen (in modal) -->
                 <div class="total-overview hidden" id="modal-total-overview">
                     <div class="workline-totals" id="modal-workline-totals">
-                        <!-- Wordt dynamisch gevuld -->
                     </div>
                 </div>
 
-                <!-- Stap 2: Urenregistratie (in modal) -->
                 <div class="section hidden" id="modal-hours-registration">
-                    <h3>2. Voer aantal uren per activiteit in:</h3>
+                    <h3>3. Voer aantal uren per activiteit in:</h3>
                     
                     <table class="activities-table">
                         <thead>
@@ -1282,17 +1251,17 @@
                             </tr>
                         </thead>
                         <tbody id="modal-activities-tbody">
-                            <!-- Wordt dynamisch gevuld op basis van gekozen werklijn -->
                         </tbody>
                     </table>
                     
                     <div class="controls">
-                        <button class="btn btn-primary" onclick="saveRegistrationFromModal()">Opslaan</button>
                         <button class="btn btn-secondary" onclick="closeHoursModal()">Annuleren</button>
+                        <button class="btn btn-primary" onclick="saveRegistrationFromModal()">Opslaan</button>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="modal" id="employee-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1306,70 +1275,14 @@
                 </div>
                 
                 <div class="employee-list" id="employee-list">
-                    <!-- Wordt dynamisch gevuld -->
                 </div>
             </div>
         </div>
-        
-        <!-- OUDE SECTIES - NU VERBORGEN OMDAT WE DE MODAL GEBRUIKEN -->
-        
-        <!-- Stap 1: Werknemer selecteren - VERBORGEN omdat we nu vanuit planning selecteren -->
-        <div class="section hidden" id="employee-selection" style="display: none;">
-            <h2>1. Kies werknemer:</h2>
-            <div class="employee-grid" id="employee-grid">
-                <!-- Wordt dynamisch gevuld -->
-            </div>
-        </div>
 
-        <!-- Stap 1: Werklijn selecteren - VERBORGEN omdat we nu modal gebruiken -->
-        <div class="section hidden" id="workline-selection" style="display: none;">
-            <h2>1. Kies afdeling:</h2>
-            <div id="workline-grid" class="workline-grid">
-                <button class="workline-btn" onclick="selectWorkLine('schillijn')">Schillijn</button>
-                <button class="workline-btn" onclick="selectWorkLine('inpakken')">Inpakken</button>
-                <button class="workline-btn" onclick="selectWorkLine('sousvide')">Sous-vide</button>
-                <button class="workline-btn" onclick="selectWorkLine('koelcel')">Koelcel</button>
-                <button class="workline-btn" onclick="selectWorkLine('fusthal')">Fusthal</button>
-                <button class="workline-btn" onclick="selectWorkLine('puree')">Puree</button>
-            </div>
-        </div>
-
-        <!-- Totaal overzicht - VERBORGEN omdat we nu modal gebruiken -->
-        <div class="total-overview hidden" id="total-overview" style="display: none;">
-            <div class="workline-totals" id="workline-totals">
-                <!-- Wordt dynamisch gevuld -->
-            </div>
-        </div>
-
-        <!-- Stap 2: Urenregistratie - VERBORGEN omdat we nu modal gebruiken -->
-        <div class="section hidden" id="hours-registration" style="display: none;">
-            <h2>2. Voer aantal uren per activiteit in:</h2>
-            
-            <table class="activities-table">
-                <thead>
-                    <tr>
-                        <th>Activiteit</th>
-                        <th style="text-align: center;">Aantal uren</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="activities-tbody">
-                    <!-- Wordt dynamisch gevuld op basis van gekozen werklijn -->
-                </tbody>
-            </table>
-            
-            <div class="controls">
-                <button class="btn btn-primary" onclick="saveRegistration()">Opslaan</button>
-            </div>
-        </div>
-
-        <!-- Status berichten -->
         <div id="status-message"></div>
 
-        <!-- Data overzicht en download -->
         <div class="section">
             <div class="data-overview">
-                <!-- Werknemers totalen -->
                 <div style="margin-top: 30px;">
                     <h3 style="margin-bottom: 15px; color: #495057; font-size: 1.4em; font-weight: 600;">
                         Uren per werknemer (vandaag):
@@ -1396,15 +1309,308 @@
 
     <script src="https://alcdn.msauth.net/browser/2.32.2/js/msal-browser.min.js"></script>
     <script>
-        // Personeelsplanning variabelen
+        let selectedDate = null;
+        let currentWeekStart = null;
+
+        function initializeDates() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            
+            currentWeekStart = new Date(today);
+            currentWeekStart.setDate(today.getDate() - daysFromMonday);
+            currentWeekStart.setHours(0, 0, 0, 0);
+            
+            selectedDate = new Date(today);
+            selectedDate.setHours(0, 0, 0, 0);
+        }
+
+        function updateModalWeekDisplay() {
+            const weekEnd = new Date(currentWeekStart);
+            weekEnd.setDate(currentWeekStart.getDate() + 6);
+            
+            const options = { day: 'numeric', month: 'short' };
+            const startStr = currentWeekStart.toLocaleDateString('nl-NL', options);
+            const endStr = weekEnd.toLocaleDateString('nl-NL', options);
+            const year = currentWeekStart.getFullYear();
+            
+            const modalWeekDisplay = document.getElementById('modal-current-week-display');
+            if (modalWeekDisplay) {
+                modalWeekDisplay.textContent = 
+                    `Week ${getWeekNumber(currentWeekStart)} - ${startStr} t/m ${endStr} ${year}`;
+            }
+        }
+
+        function updateModalDayButtons() {
+            const dayButtons = document.getElementById('modal-day-buttons');
+            if (!dayButtons) return;
+            
+            dayButtons.innerHTML = '';
+            
+            const days = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            days.forEach((dayName, index) => {
+                const date = new Date(currentWeekStart);
+                date.setDate(currentWeekStart.getDate() + index);
+                
+                const button = document.createElement('button');
+                button.className = 'day-btn';
+                button.textContent = `${dayName}\n${date.getDate()}/${date.getMonth() + 1}`;
+                
+                if (date.getTime() === today.getTime()) {
+                    button.classList.add('today');
+                } else if (date > today) {
+                    button.classList.add('future');
+                    button.disabled = true;
+                }
+                
+                if (date.getTime() === selectedDate.getTime()) {
+                    button.classList.add('selected');
+                }
+                
+                if (date <= today) {
+                    button.onclick = () => selectModalDate(date);
+                }
+                
+                dayButtons.appendChild(button);
+            });
+        }
+
+        function selectModalDate(date) {
+            selectedDate = new Date(date);
+            selectedDate.setHours(0, 0, 0, 0);
+            
+            updateModalDayButtons();
+            updateModalSelectedDateDisplay();
+            
+            // Reset workline selection when date changes
+            currentWorkLine = null;
+            document.getElementById('modal-workline-selection').classList.add('hidden');
+            document.getElementById('modal-hours-registration').classList.add('hidden');
+            document.getElementById('modal-total-overview').classList.add('hidden');
+            
+            // Reload existing registrations for new date
+            if (currentEmployee) {
+                loadExistingRegistrationsForSelectedDate(currentEmployee);
+                updateWorklineButtonsWithExistingHours();
+                
+                // Show workline selection after date is selected
+                document.getElementById('modal-workline-selection').classList.remove('hidden');
+            }
+        }
+
+        function updateModalSelectedDateDisplay() {
+            // Update modal title only
+            if (currentEmployee) {
+                document.getElementById('hours-modal-title').textContent = 
+                    `Urenregistratie voor ${currentEmployee} - ${selectedDate.toLocaleDateString('nl-NL')}`;
+            }
+        }
+
+        function getWeekNumber(date) {
+            const tempDate = new Date(date);
+            tempDate.setHours(0, 0, 0, 0);
+            tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
+            const week1 = new Date(tempDate.getFullYear(), 0, 4);
+            return 1 + Math.round(((tempDate - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+        }
+
+        function updateDayButtons() {
+            // This function is no longer needed for the main page
+            // Day buttons are now only in the modal
+        }
+
+        function selectDate(date) {
+            // This function is no longer needed for the main page
+            // Date selection is now only in the modal
+        }
+
+        function updateSelectedDateDisplay() {
+            // This function is no longer needed for the main page
+            // Selected date display is now only in the modal
+        }
+
+        const REDIRECT_URI = 'https://sh-online.github.io/tijdregistratie/';
+        
+        const msalConfig = {
+            auth: {
+                clientId: 'b6bac90f-29af-4137-a5f0-be4387796f56',
+                authority: 'https://login.microsoftonline.com/common',
+                redirectUri: REDIRECT_URI
+            },
+            cache: {
+                cacheLocation: 'localStorage',
+                storeAuthStateInCookie: false
+            }
+        };
+
+        const loginRequest = {
+            scopes: ['Files.ReadWrite', 'User.Read'],
+            redirectUri: REDIRECT_URI
+        };
+
+        let msalInstance;
+        let account = null;
+
+        const workLines = {
+            'schillijn': {
+                name: 'Schillijn',
+                activities: ['Produceren', 'Lezen', 'Sous-vide', 'Herbewerken', 'Schoonmaken', 'Overig']
+            },
+            'inpakken': {
+                name: 'Inpakken', 
+                activities: ['Produceren', 'Kratten', 'Herbewerken', 'Schoonmaken', 'Overig']
+            },
+            'sousvide': {
+                name: 'Sous-vide',
+                activities: ['Gea', 'Overpakken', 'Sleeven', 'Lossnijden', 'Schoonmaken', 'Overig']
+            },
+            'koelcel': {
+                name: 'Koelcel',
+                activities: ['Orderpicken', 'Overpakken', 'Voorraadopname', 'Schoonmaken', 'Herbewerken', 'Overig']
+            },
+            'fusthal': {
+                name: 'Fusthal',
+                activities: ['Wassen', 'Schoonmaken', 'Overig']
+            },
+            'puree': {
+                name: 'Puree',
+                activities: ['Produceren', 'Inpakken', 'Schoonmaken', 'Herbewerken', 'Overig']
+            }
+        };
+        
+        let employees = [
+            'Agnieszka', 'Aniel', 'Arkadiusz', 'Biniam', 'Biyik', 'Boa', 'Fred', 'Herman', 
+            'Kamila', 'Klaas', 'Magda', 'Mustafa', 'Okan', 'Paul', 'Paula', 'Rakesh', 
+            'Randhir', 'Rein', 'Roy', 'Samantha', 'Sen', 'Stefan', 'Willem-Jan', 'Wubbe',
+            'BDE Agniezka Ircha', 'BDE Amber', 'BDE Ewelina', 'BDE Jessica', 'BDE Krzystof',
+            'BDE Monika', 'BDE Patryk', 'BDE Paulina', 'BDE Saraela', 'BDE Uliana',
+            'BDE Yaroslav', 'BDE Mahmut', 'BDE Przemyslaw', 'BDE Ewa', 'BDE Man'
+        ];
+        
+        let registrations = [];
+        let currentEmployee = null;
+        let currentWorkLine = null;
+        let multiWorkLineData = {};
         let planningData = [];
-        let allPlanningData = []; // Bewaar originele data voor filtering
+        let allPlanningData = [];
         let planningHeader = [];
 
-        // Personeelsplanning functies
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            
+            setTimeout(() => {
+                statusEl.textContent = '';
+                statusEl.className = '';
+            }, 4000);
+        }
+
+        function toggleDataManagement() {
+            const managementEl = document.getElementById('data-management');
+            const btnEl = event.target;
+            
+            if (managementEl.classList.contains('hidden')) {
+                managementEl.classList.remove('hidden');
+                btnEl.textContent = 'Verberg opties';
+            } else {
+                managementEl.classList.add('hidden');
+                btnEl.textContent = 'Beheer opties';
+            }
+        }
+
+        function openEmployeeModal() {
+            document.getElementById('employee-modal').classList.add('show');
+        }
+
+        function closeEmployeeModal() {
+            document.getElementById('employee-modal').classList.remove('show');
+        }
+
+        function closeHoursModal() {
+            document.getElementById('hours-modal').classList.remove('show');
+            currentEmployee = null;
+            currentWorkLine = null;
+            multiWorkLineData = {};
+            
+            // Reset modal state
+            document.getElementById('modal-date-selection').classList.remove('hidden');
+            document.getElementById('modal-workline-selection').classList.add('hidden');
+            document.getElementById('modal-hours-registration').classList.add('hidden');
+            document.getElementById('modal-total-overview').classList.add('hidden');
+        }
+
+        function addEmployee() {
+            const nameInput = document.getElementById('new-employee-name');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                showStatus('Voer een naam in', 'error');
+                return;
+            }
+            
+            if (employees.includes(name)) {
+                showStatus('Deze werknemer bestaat al', 'error');
+                return;
+            }
+            
+            employees.push(name);
+            employees.sort();
+            saveEmployees();
+            updateEmployeeList();
+            
+            nameInput.value = '';
+            showStatus(`${name} toegevoegd`, 'success');
+        }
+
+        function removeEmployee(name) {
+            if (confirm(`Weet je zeker dat je ${name} wilt verwijderen?`)) {
+                employees = employees.filter(emp => emp !== name);
+                saveEmployees();
+                updateEmployeeList();
+                showStatus(`${name} verwijderd`, 'success');
+            }
+        }
+
+        function saveEmployees() {
+            localStorage.setItem('sousvide_employees', JSON.stringify(employees));
+        }
+
+        function loadEmployees() {
+            const savedEmployees = localStorage.getItem('sousvide_employees');
+            if (savedEmployees) {
+                employees = JSON.parse(savedEmployees);
+            }
+            updateEmployeeList();
+        }
+
+        function updateEmployeeList() {
+            const listEl = document.getElementById('employee-list');
+            listEl.innerHTML = '';
+            
+            employees.forEach(employee => {
+                const item = document.createElement('div');
+                item.className = 'employee-item';
+                item.innerHTML = `
+                    <span>${employee}</span>
+                    <button class="btn-remove" onclick="removeEmployee('${employee}')">Verwijder</button>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
         function loadPlanningCSV(event) {
             const file = event.target.files[0];
             if (!file) return;
+            
+            // Display filename without .csv extension
+            const fileName = file.name.replace(/\.csv$/i, '');
+            const fileNameDisplay = document.getElementById('file-name-display');
+            fileNameDisplay.textContent = fileName;
+            fileNameDisplay.style.display = 'inline-block';
             
             showStatus('CSV bestand laden...', 'success');
             
@@ -1412,62 +1618,44 @@
             reader.onload = function(e) {
                 let csv = e.target.result;
                 
-                // Verwijder UTF-8 BOM als deze er is
                 if (csv.charCodeAt(0) === 0xFEFF) {
                     csv = csv.slice(1);
-                    console.log('UTF-8 BOM verwijderd');
                 }
                 
                 parsePlanningCSV(csv);
             };
             
-            // Probeer eerst UTF-8, dan andere encodings
             reader.readAsText(file, 'UTF-8');
         }
-        
+
         function parsePlanningCSV(csvText) {
             try {
-                console.log('=== CSV PARSING DEBUG ===');
-                console.log('Originele CSV lengte:', csvText.length);
-                console.log('Eerste 200 karakters:', csvText.substring(0, 200));
-                console.log('Char codes eerste regel:', csvText.substring(0, 50).split('').map(c => c.charCodeAt(0)));
-                
-                // Normaliseer line endings en trim
                 csvText = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
                 
                 const lines = csvText.split('\n');
-                console.log('Aantal regels na split:', lines.length);
-                console.log('Eerste regel:', JSON.stringify(lines[0]));
                 
                 if (lines.length < 1) {
                     showStatus('CSV bestand is leeg', 'error');
                     return;
                 }
                 
-                // Test verschillende delimiters met de eerste regel
                 const firstLine = lines[0];
                 let delimiter = ';';
                 let header = [];
                 
-                // Test puntkomma
                 let testHeader = firstLine.split(';').map(h => h.trim());
-                console.log('Test met ; (', testHeader.length, 'kolommen):', testHeader);
                 
                 if (testHeader.length > 1) {
                     delimiter = ';';
                     header = testHeader;
                 } else {
-                    // Test comma
                     testHeader = firstLine.split(',').map(h => h.trim());
-                    console.log('Test met , (', testHeader.length, 'kolommen):', testHeader);
                     
                     if (testHeader.length > 1) {
                         delimiter = ',';
                         header = testHeader;
                     } else {
-                        // Test tab
                         testHeader = firstLine.split('\t').map(h => h.trim());
-                        console.log('Test met tab (', testHeader.length, 'kolommen):', testHeader);
                         
                         if (testHeader.length > 1) {
                             delimiter = '\t';
@@ -1478,9 +1666,6 @@
                         }
                     }
                 }
-                
-                console.log('Gekozen delimiter:', JSON.stringify(delimiter));
-                console.log('Header kolommen:', header);
                 
                 if (lines.length < 2) {
                     showStatus('CSV heeft alleen een header, geen data regels', 'error');
@@ -1495,16 +1680,13 @@
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if (!line) {
-                        console.log(`Regel ${i + 1} is leeg, overslaan`);
                         skipCount++;
                         continue;
                     }
                     
                     const row = line.split(delimiter).map(cell => cell.trim());
-                    console.log(`Regel ${i + 1} (${row.length} kolommen):`, row);
                     
                     if (row.length !== header.length) {
-                        console.log(`Regel ${i + 1} heeft ${row.length} kolommen, verwacht ${header.length} - overslaan`);
                         skipCount++;
                         continue;
                     }
@@ -1514,50 +1696,38 @@
                         employee[col] = row[index];
                     });
                     
-                    // Zoek naam in verschillende kolommen
                     const nameField = employee.Naam || employee.naam || employee.Name || employee.name || 
                                     employee.NAAM || employee.Werknemer || employee.werknemer;
                     
                     if (nameField && nameField.trim() && nameField !== '') {
                         allPlanningData.push(employee);
-                        console.log(`✓ Employee ${successCount + 1} toegevoegd:`, nameField);
                         successCount++;
                     } else {
-                        console.log(`✗ Regel ${i + 1} geen geldige naam gevonden in:`, employee);
                         skipCount++;
                     }
                 }
-                
-                console.log('=== RESULTAAT ===');
-                console.log('Succesvol geladen:', successCount);
-                console.log('Overgeslagen regels:', skipCount);
-                console.log('Totaal data regels:', successCount);
                 
                 if (allPlanningData.length === 0) {
                     showStatus(`Geen geldige medewerkergegevens gevonden. Controleer of er een naam kolom is. Gevonden kolommen: ${header.join(', ')}`, 'error');
                     return;
                 }
                 
-                // Initieel alle data tonen
                 planningData = [...allPlanningData];
                 
-                // Vul filters
                 updatePloegFilter();
                 
                 displayPlanningTable();
                 showStatus(`Planning geladen: ${allPlanningData.length} medewerkers (${skipCount} regels overgeslagen)`, 'success');
                 
             } catch (error) {
-                console.error('Error parsing CSV:', error);
                 showStatus('Fout bij laden CSV: ' + error.message, 'error');
             }
         }
-        
+
         function updatePloegFilter() {
             const ploegButtons = document.getElementById('ploeg-buttons');
             const afdelingButtons = document.getElementById('afdeling-buttons');
             
-            // Update ploeg buttons
             const ploegen = [...new Set(allPlanningData.map(emp => emp.Ploeg || emp.ploeg))].filter(Boolean).sort();
             ploegButtons.innerHTML = '<button class="filter-btn active" onclick="filterByPloeg(\'\')">Alle ploegen</button>';
             ploegen.forEach(ploeg => {
@@ -1568,7 +1738,6 @@
                 ploegButtons.appendChild(button);
             });
             
-            // Update afdeling buttons
             const afdelingen = [...new Set(allPlanningData.map(emp => emp.Afdeling || emp.afdeling))].filter(Boolean).sort();
             afdelingButtons.innerHTML = '<button class="filter-btn active" onclick="filterByAfdeling(\'\')">Alle afdelingen</button>';
             afdelingen.forEach(afdeling => {
@@ -1578,9 +1747,6 @@
                 button.onclick = () => filterByAfdeling(afdeling);
                 afdelingButtons.appendChild(button);
             });
-            
-            console.log('Beschikbare ploegen:', ploegen);
-            console.log('Beschikbare afdelingen:', afdelingen);
         }
 
         let currentPloegFilter = '';
@@ -1589,7 +1755,6 @@
         function filterByPloeg(ploeg) {
             currentPloegFilter = ploeg;
             
-            // Update button states
             document.querySelectorAll('#ploeg-buttons .filter-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if ((ploeg === '' && btn.textContent === 'Alle ploegen') || btn.textContent === ploeg) {
@@ -1603,7 +1768,6 @@
         function filterByAfdeling(afdeling) {
             currentAfdelingFilter = afdeling;
             
-            // Update button states
             document.querySelectorAll('#afdeling-buttons .filter-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if ((afdeling === '' && btn.textContent === 'Alle afdelingen') || btn.textContent === afdeling) {
@@ -1618,20 +1782,16 @@
             planningData = allPlanningData.filter(emp => {
                 let matches = true;
                 
-                // Filter op ploeg
                 if (currentPloegFilter && (emp.Ploeg || emp.ploeg) !== currentPloegFilter) {
                     matches = false;
                 }
                 
-                // Filter op afdeling
                 if (currentAfdelingFilter && (emp.Afdeling || emp.afdeling) !== currentAfdelingFilter) {
                     matches = false;
                 }
                 
                 return matches;
             });
-            
-            console.log(`Gefilterd op ploeg "${currentPloegFilter}" en afdeling "${currentAfdelingFilter}":`, planningData.length, 'medewerkers');
             
             displayPlanningTable();
             updatePlanningInfo();
@@ -1654,24 +1814,21 @@
             
             planningInfo.textContent = infoText;
         }
-        
+
         function displayPlanningTable() {
             const tableHead = document.getElementById('planning-head');
             const tableBody = document.getElementById('planning-body');
             
-            // Create header - SKIP de eerste twee kolommen (Ploeg en Afdeling) + voeg werkelijke uren toe
             tableHead.innerHTML = '';
             const headerRow = document.createElement('tr');
             
             planningHeader.forEach((col, index) => {
-                // Skip Ploeg (index 0) en Afdeling (index 1)
                 if (index === 0 || index === 1) return;
                 
                 const th = document.createElement('th');
                 th.textContent = col;
                 headerRow.appendChild(th);
                 
-                // Voeg "Uren" kolom toe na elke "plan" kolom (vervang "plan" met "uren")
                 if (col.includes('plan')) {
                     const thWerkelijk = document.createElement('th');
                     thWerkelijk.textContent = col.replace('plan', 'uren');
@@ -1682,24 +1839,20 @@
             });
             tableHead.appendChild(headerRow);
             
-            // Create body - SKIP de eerste twee kolommen + voeg werkelijke uren toe
             tableBody.innerHTML = '';
             planningData.forEach(emp => {
                 const row = document.createElement('tr');
                 
                 planningHeader.forEach((col, index) => {
-                    // Skip Ploeg (index 0) en Afdeling (index 1)
                     if (index === 0 || index === 1) return;
                     
                     const cell = document.createElement('td');
                     let cellData = emp[col] || '';
                     
-                    // Check if this is the naam kolom
                     const isNameColumn = col.toLowerCase().includes('naam') || col.toLowerCase() === 'naam' || 
                                        col.toLowerCase() === 'name' || col.toLowerCase() === 'werknemer';
                     
                     if (isNameColumn) {
-                        // Maak de naam klikbaar voor urenregistratie
                         const employeeName = cellData;
                         cell.style.cursor = 'pointer';
                         cell.style.transition = 'all 0.2s';
@@ -1710,7 +1863,6 @@
                         
                         cell.onclick = () => startUrenRegistratie(employeeName);
                         
-                        // Hover effect
                         cell.onmouseover = () => {
                             cell.style.backgroundColor = '#007bff';
                             cell.style.color = 'white';
@@ -1722,24 +1874,15 @@
                             cell.style.transform = 'scale(1)';
                         };
                         
-                        // Tooltip
                         cell.title = `Klik om uren in te voeren voor ${employeeName}`;
-                    }
-                    
-                    // Format tijd cellen
-                    if (col.includes('begin') || col.includes('einde')) {
-                        cellData = formatTime(cellData);
-                        cell.className = 'time-cell';
                     }
                     
                     cell.textContent = cellData;
                     row.appendChild(cell);
                     
-                    // Voeg werkelijke uren cel toe na elke geplande uren kolom ("plan") - nu NIET klikbaar
                     if (col.includes('plan')) {
                         const werkelijkCell = document.createElement('td');
                         
-                        // Bepaal welke dag dit is
                         let dag = '';
                         if (col.includes('Ma')) dag = 'maandag';
                         else if (col.includes('Di')) dag = 'dinsdag';
@@ -1747,10 +1890,8 @@
                         else if (col.includes('Do')) dag = 'donderdag';
                         else if (col.includes('Vr')) dag = 'vrijdag';
                         
-                        // Haal werkelijke uren op voor deze werknemer en dag
                         const werkelijkeUren = getWerkelijkeUren(emp.Naam || emp.naam, dag);
                         
-                        // Gewoon de uren tonen, geen klik functionaliteit
                         werkelijkCell.textContent = werkelijkeUren > 0 ? werkelijkeUren.toFixed(2) : '-';
                         
                         if (werkelijkeUren > 0) {
@@ -1767,22 +1908,13 @@
             
             updatePlanningInfo();
             
-            // Show table and hide no-planning message
             document.getElementById('planning-display').style.display = 'block';
             document.getElementById('no-planning-message').style.display = 'none';
         }
-        
+
         function getWerkelijkeUren(employeeName, dag) {
             if (!registrations || !employeeName || !dag) return 0;
             
-            // Get current week Monday
-            const today = new Date();
-            const currentDay = today.getDay(); // 0 = zondag, 1 = maandag, etc.
-            const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Als zondag, dan 6 dagen terug
-            const monday = new Date(today);
-            monday.setDate(today.getDate() - daysFromMonday);
-            
-            // Bereken target datum voor de gevraagde dag
             const dagNummers = {
                 'maandag': 0,
                 'dinsdag': 1, 
@@ -1791,29 +1923,22 @@
                 'vrijdag': 4
             };
             
-            const targetDate = new Date(monday);
-            targetDate.setDate(monday.getDate() + dagNummers[dag]);
+            const targetDate = new Date(currentWeekStart);
+            targetDate.setDate(currentWeekStart.getDate() + dagNummers[dag]);
             const targetDateString = targetDate.toISOString().split('T')[0];
             
-            console.log(`Zoek werkelijke uren voor ${employeeName} op ${dag} (${targetDateString})`);
-            
-            // Zoek registraties voor deze werknemer op deze datum
             let totalHours = 0;
             
             registrations.forEach(reg => {
                 if (reg.employee === employeeName && reg.date === targetDateString) {
-                    console.log(`Gevonden registratie voor ${employeeName}:`, reg);
-                    
                     if (reg.hours && typeof reg.hours === 'object') {
                         if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                            // Nieuwe format (object met werklijnen als keys)
                             Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
                                 Object.values(activities).forEach(hours => {
                                     totalHours += parseFloat(hours) || 0;
                                 });
                             });
                         } else {
-                            // Oude format (direct activities)
                             Object.values(reg.hours).forEach(hours => {
                                 totalHours += parseFloat(hours) || 0;
                             });
@@ -1822,88 +1947,70 @@
                 }
             });
             
-            console.log(`Totaal werkelijke uren voor ${employeeName} op ${dag}: ${totalHours}`);
             return totalHours;
         }
-        
-        // Nieuwe functie: Start urenregistratie vanuit planning in modal
+
         function startUrenRegistratie(employeeName) {
-            console.log(`Start urenregistratie voor ${employeeName} in modal`);
-            
-            // Stel de geselecteerde werknemer in
             currentEmployee = employeeName;
             currentWorkLine = null;
             multiWorkLineData = {};
             
-            // Laad bestaande registraties voor vandaag
-            loadExistingRegistrationsForToday(employeeName);
+            // Reset selected date to today when starting new registration
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            selectedDate = new Date(today);
             
-            // Update modal titel
-            document.getElementById('hours-modal-title').textContent = `Urenregistratie voor ${employeeName}`;
+            loadExistingRegistrationsForSelectedDate(employeeName);
             
-            // Reset modal state
-            document.getElementById('modal-workline-selection').classList.remove('hidden');
+            document.getElementById('hours-modal-title').textContent = 
+                `Urenregistratie voor ${employeeName}`;
+            
+            // Show date selection first
+            document.getElementById('modal-date-selection').classList.remove('hidden');
+            document.getElementById('modal-workline-selection').classList.add('hidden');
             document.getElementById('modal-hours-registration').classList.add('hidden');
             document.getElementById('modal-total-overview').classList.add('hidden');
             
-            // Reset en update werklijnselecties in modal
+            // Initialize modal date displays
+            updateModalWeekDisplay();
+            updateModalDayButtons();
+            updateModalSelectedDateDisplay();
+            
             updateWorklineButtonsWithExistingHours();
             
-            // Toon modal
             document.getElementById('hours-modal').classList.add('show');
             
-            // Toon status bericht
-            const existingHours = getTotalHoursForToday(employeeName);
+            const existingHours = getTotalHoursForSelectedDate(employeeName);
             if (existingHours > 0) {
-                showStatus(`Bestaande registratie geladen voor ${employeeName} (${existingHours.toFixed(2)}u vandaag)`, 'success');
+                showStatus(`Bestaande registratie geladen voor ${employeeName} (${existingHours.toFixed(2)}u op ${selectedDate.toLocaleDateString('nl-NL')})`, 'success');
             } else {
-                showStatus(`Nieuwe urenregistratie voor ${employeeName}`, 'success');
+                showStatus(`Nieuwe urenregistratie voor ${employeeName} op ${selectedDate.toLocaleDateString('nl-NL')}`, 'success');
             }
-        }
-
-        // Nieuwe functie: Update werklijnsknoppen met bestaande uren
-        function updateWorklineButtonsWithExistingHours() {
-            document.querySelectorAll('#modal-workline-grid .workline-btn').forEach(btn => {
-                btn.classList.remove('selected', 'has-hours');
-                
-                // Check of er uren zijn voor deze werklijn
-                const workLineKey = btn.onclick.toString().match(/'([^']+)'/)[1];
-                if (multiWorkLineData[workLineKey] && Object.keys(multiWorkLineData[workLineKey]).length > 0) {
-                    const hoursForWorkLine = Object.values(multiWorkLineData[workLineKey]).reduce((sum, hours) => sum + hours, 0);
-                    btn.classList.add('has-hours');
-                    btn.innerHTML = `${workLines[workLineKey].name}<br><small>(${hoursForWorkLine.toFixed(2)}u)</small>`;
-                } else {
-                    btn.textContent = workLines[workLineKey].name;
-                }
-            });
-        }
-
-        // Nieuwe functie: Laad bestaande registraties voor vandaag
-        function loadExistingRegistrationsForToday(employeeName) {
-            const today = new Date().toISOString().split('T')[0];
             
-            // Zoek alle registraties voor deze werknemer vandaag
-            const todayRegistrations = registrations.filter(reg => 
-                reg.employee === employeeName && reg.date === today
+            // Automatically show workline selection after a short delay
+            setTimeout(() => {
+                document.getElementById('modal-workline-selection').classList.remove('hidden');
+            }, 500);
+        }
+
+        function loadExistingRegistrationsForSelectedDate(employeeName) {
+            const selectedDateString = selectedDate.toISOString().split('T')[0];
+            
+            const selectedDateRegistrations = registrations.filter(reg => 
+                reg.employee === employeeName && reg.date === selectedDateString
             );
             
-            console.log(`Gevonden ${todayRegistrations.length} registraties voor ${employeeName} op ${today}:`, todayRegistrations);
-            
-            // Reset multiWorkLineData
             multiWorkLineData = {};
             
-            // Combineer alle registraties in multiWorkLineData
-            todayRegistrations.forEach(reg => {
+            selectedDateRegistrations.forEach(reg => {
                 if (reg.hours && typeof reg.hours === 'object') {
                     if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                        // Nieuwe format (object met werklijnen als keys)
                         Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
                             if (!multiWorkLineData[workLineKey]) {
                                 multiWorkLineData[workLineKey] = {};
                             }
                             
                             Object.entries(activities).forEach(([activity, hours]) => {
-                                // Voeg uren toe (of overschrijf als het dezelfde activiteit is)
                                 if (multiWorkLineData[workLineKey][activity]) {
                                     multiWorkLineData[workLineKey][activity] += parseFloat(hours);
                                 } else {
@@ -1912,7 +2019,6 @@
                             });
                         });
                     } else if (reg.workLineName) {
-                        // Oude format - converteer naar nieuwe format
                         const workLineKey = Object.keys(workLines).find(key => workLines[key].name === reg.workLineName);
                         if (workLineKey) {
                             if (!multiWorkLineData[workLineKey]) {
@@ -1930,27 +2036,22 @@
                     }
                 }
             });
-            
-            console.log('Gecombineerde multiWorkLineData:', multiWorkLineData);
         }
 
-        // Nieuwe functie: Krijg totaal uren voor vandaag
-        function getTotalHoursForToday(employeeName) {
-            const today = new Date().toISOString().split('T')[0];
+        function getTotalHoursForSelectedDate(employeeName) {
+            const selectedDateString = selectedDate.toISOString().split('T')[0];
             let totalHours = 0;
             
             registrations.forEach(reg => {
-                if (reg.employee === employeeName && reg.date === today) {
+                if (reg.employee === employeeName && reg.date === selectedDateString) {
                     if (reg.hours && typeof reg.hours === 'object') {
                         if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                            // Nieuwe format
                             Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
                                 Object.values(activities).forEach(hours => {
                                     totalHours += parseFloat(hours) || 0;
                                 });
                             });
                         } else {
-                            // Oude format
                             Object.values(reg.hours).forEach(hours => {
                                 totalHours += parseFloat(hours) || 0;
                             });
@@ -1962,18 +2063,7 @@
             return totalHours;
         }
 
-        function closeHoursModal() {
-            document.getElementById('hours-modal').classList.remove('show');
-            
-            // Reset state
-            currentEmployee = null;
-            currentWorkLine = null;
-            multiWorkLineData = {};
-        }
-
         function selectWorkLineInModal(workLineKey) {
-            console.log('selectWorkLineInModal called:', workLineKey);
-            
             if (currentWorkLine) {
                 saveCurrentWorkLineDataInModal();
             }
@@ -1990,7 +2080,6 @@
             loadWorkLineDataInModal(workLineKey);
             updateTotalOverviewInModal();
             
-            // Toon bericht als er al uren zijn voor deze afdeling
             if (multiWorkLineData[workLineKey] && Object.keys(multiWorkLineData[workLineKey]).length > 0) {
                 const existingHours = Object.values(multiWorkLineData[workLineKey]).reduce((sum, hours) => sum + hours, 0);
                 showStatus(`Bestaande uren geladen voor ${workLine.name}: ${existingHours.toFixed(2)}u`, 'success');
@@ -2174,7 +2263,22 @@
             });
         }
 
-        async function saveRegistrationFromModal() {
+        function updateWorklineButtonsWithExistingHours() {
+            document.querySelectorAll('#modal-workline-grid .workline-btn').forEach(btn => {
+                btn.classList.remove('selected', 'has-hours');
+                
+                const workLineKey = btn.onclick.toString().match(/'([^']+)'/)[1];
+                if (multiWorkLineData[workLineKey] && Object.keys(multiWorkLineData[workLineKey]).length > 0) {
+                    const hoursForWorkLine = Object.values(multiWorkLineData[workLineKey]).reduce((sum, hours) => sum + hours, 0);
+                    btn.classList.add('has-hours');
+                    btn.innerHTML = `${workLines[workLineKey].name}<br><small>(${hoursForWorkLine.toFixed(2)}u)</small>`;
+                } else {
+                    btn.textContent = workLines[workLineKey].name;
+                }
+            });
+        }
+
+        function saveRegistrationFromModal() {
             if (!currentEmployee) {
                 showStatus('Geen werknemer geselecteerd', 'error');
                 return;
@@ -2197,19 +2301,17 @@
                 });
             });
             
-            const today = new Date().toISOString().split('T')[0];
+            const selectedDateString = selectedDate.toISOString().split('T')[0];
             const currentTime = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
             
-            // Verwijder ALLE bestaande registraties voor deze werknemer vandaag
             registrations = registrations.filter(reg => 
-                !(reg.employee === currentEmployee && reg.date === today)
+                !(reg.employee === currentEmployee && reg.date === selectedDateString)
             );
             
-            // Voeg de nieuwe gecombineerde registratie toe
             const registration = {
                 employee: currentEmployee,
                 workLineNames: workLineNames,
-                date: today,
+                date: selectedDateString,
                 time: currentTime,
                 hours: multiWorkLineData,
                 total: totalHours
@@ -2218,886 +2320,24 @@
             registrations.unshift(registration);
             localStorage.setItem('sousvide_registrations', JSON.stringify(registrations));
             
-            console.log('Opgeslagen registratie:', registration);
-            console.log('CurrentEmployee bij opslaan:', currentEmployee);
-            
-            if (account) {
-                await intelligentUpload();
-            } else {
-                showStatus('⚠️ Opgeslagen lokaal - login voor automatische upload', 'error');
-            }
-            
-            // Bewaar de werknemernaam voor de status melding voordat we de modal sluiten
             const employeeName = currentEmployee;
+            const dateText = selectedDate.toLocaleDateString('nl-NL');
             
-            // Sluit modal
             closeHoursModal();
             
             updateDataPreview();
             
-            // Update planning tabel als deze zichtbaar is
-            updatePlanningWithNewRegistration();
-            
-            showStatus(`✅ Uren bijgewerkt voor ${employeeName} (${totalHours.toFixed(2)}u totaal)!`, 'success');
-        }
-        function updatePlanningWithNewRegistration() {
             if (planningData.length > 0) {
-                console.log('Update planning tabel met nieuwe registratie');
                 displayPlanningTable();
             }
-        }
-        
-        function formatTime(timeStr) {
-            if (!timeStr || timeStr === '') return '';
             
-            const cleanTime = timeStr.toString().replace(/\D/g, '');
-            if (cleanTime.length === 3) {
-                return cleanTime.charAt(0) + ':' + cleanTime.slice(1);
-            } else if (cleanTime.length === 4) {
-                return cleanTime.slice(0, 2) + ':' + cleanTime.slice(2);
-            }
-            return timeStr;
-        }
-        
-        function getTimeClass(timeStr) {
-            if (!timeStr) return '';
-            
-            const time = timeStr.replace(':', '');
-            const numTime = parseInt(time);
-            
-            if (numTime >= 500 && numTime < 1200) {
-                return 'early-shift';
-            } else if (numTime >= 1200 && numTime < 2000) {
-                return 'late-shift';
-            } else if (numTime >= 2000 || numTime < 500) {
-                return 'night-shift';
-            }
-            
-            return '';
-        }
-        
-        function clearPlanning() {
-            planningData = [];
-            allPlanningData = [];
-            planningHeader = [];
-            currentPloegFilter = '';
-            currentAfdelingFilter = '';
-            
-            document.getElementById('planning-display').style.display = 'none';
-            document.getElementById('planning-file').value = '';
-            
-            // Reset filter buttons
-            document.getElementById('ploeg-buttons').innerHTML = '<button class="filter-btn active" onclick="filterByPloeg(\'\')">Alle ploegen</button>';
-            document.getElementById('afdeling-buttons').innerHTML = '<button class="filter-btn active" onclick="filterByAfdeling(\'\')">Alle afdelingen</button>';
-            
-            showStatus('Personeelsplanning gewist', 'success');
-        }
-
-        // Alle originele code hieronder - ongewijzigd
-        console.log('=== MSAL CONFIG DEBUG ===');
-        
-        const REDIRECT_URI = 'https://sh-online.github.io/tijdregistratie/';
-        console.log('Using redirect URI:', REDIRECT_URI);
-        
-        const msalConfig = {
-            auth: {
-                clientId: 'b6bac90f-29af-4137-a5f0-be4387796f56',
-                authority: 'https://login.microsoftonline.com/common',
-                redirectUri: REDIRECT_URI
-            },
-            cache: {
-                cacheLocation: 'localStorage',
-                storeAuthStateInCookie: false
-            }
-        };
-
-        console.log('MSAL Config:', JSON.stringify(msalConfig, null, 2));
-
-        const loginRequest = {
-            scopes: ['Files.ReadWrite', 'User.Read'],
-            redirectUri: REDIRECT_URI
-        };
-
-        console.log('Login Request:', JSON.stringify(loginRequest, null, 2));
-
-        let msalInstance;
-        let account = null;
-
-        const workLines = {
-            'schillijn': {
-                name: 'Schillijn',
-                activities: ['Produceren', 'Lezen', 'Sous-vide', 'Herbewerken', 'Schoonmaken', 'Overig']
-            },
-            'inpakken': {
-                name: 'Inpakken', 
-                activities: ['Produceren', 'Kratten', 'Herbewerken', 'Schoonmaken', 'Overig']
-            },
-            'sousvide': {
-                name: 'Sous-vide',
-                activities: ['Gea', 'Overpakken', 'Sleeven', 'Lossnijden', 'Schoonmaken', 'Overig']
-            },
-            'koelcel': {
-                name: 'Koelcel',
-                activities: ['Orderpicken', 'Overpakken', 'Voorraadopname', 'Schoonmaken', 'Herbewerken', 'Overig']
-            },
-            'fusthal': {
-                name: 'Fusthal',
-                activities: ['Wassen', 'Schoonmaken', 'Overig']
-            },
-            'puree': {
-                name: 'Puree',
-                activities: ['Produceren', 'Inpakken', 'Schoonmaken', 'Herbewerken', 'Overig']
-            }
-        };
-        
-        let employees = [
-            'Agnieszka', 'Aniel', 'Arkadiusz', 'Biniam', 'Biyik', 'Boa', 'Fred', 'Herman', 
-            'Kamila', 'Klaas', 'Magda', 'Mustafa', 'Okan', 'Paul', 'Paula', 'Rakesh', 
-            'Randhir', 'Rein', 'Roy', 'Samantha', 'Sen', 'Stefan', 'Willem-Jan', 'Wubbe',
-            'BDE Agniezka Ircha', 'BDE Amber', 'BDE Ewelina', 'BDE Jessica', 'BDE Krzystof',
-            'BDE Monika', 'BDE Patryk', 'BDE Paulina', 'BDE Saraela', 'BDE Uliana',
-            'BDE Yaroslav', 'BDE Mahmut', 'BDE Przemyslaw', 'BDE Ewa', 'BDE Man'
-        ];
-        
-        let registrations = [];
-        let currentEmployee = null;
-        let currentWorkLine = null;
-        let multiWorkLineData = {};
-
-        async function initializeMSAL() {
-            try {
-                console.log('Initializing MSAL...');
-                msalInstance = new msal.PublicClientApplication(msalConfig);
-                await msalInstance.initialize();
-                console.log('MSAL initialized successfully');
-                await handleRedirectPromise();
-            } catch (error) {
-                console.error('MSAL initialization error:', error);
-            }
-        }
-
-        async function handleRedirectPromise() {
-            try {
-                console.log('Handling redirect promise...');
-                const response = await msalInstance.handleRedirectPromise();
-                if (response) {
-                    console.log('Login response received:', response);
-                    account = response.account;
-                    updateUIForSignedInUser();
-                } else {
-                    console.log('No redirect response, checking existing accounts...');
-                    const accounts = msalInstance.getAllAccounts();
-                    console.log('Existing accounts:', accounts);
-                    if (accounts.length > 0) {
-                        account = accounts[0];
-                        updateUIForSignedInUser();
-                    }
-                }
-                updateAuthButtons();
-            } catch (error) {
-                console.error('Error handling redirect:', error);
-            }
-        }
-
-        async function signInToMicrosoft() {
-            try {
-                console.log('=== SIGN IN ATTEMPT ===');
-                console.log('Using redirect URI:', REDIRECT_URI);
-                showStatus('Inloggen bij Microsoft...', 'success');
-                
-                const loginRequestWithUri = {
-                    ...loginRequest,
-                    redirectUri: REDIRECT_URI
-                };
-                
-                console.log('Final login request:', JSON.stringify(loginRequestWithUri, null, 2));
-                
-                await msalInstance.loginRedirect(loginRequestWithUri);
-            } catch (error) {
-                console.error('Login error:', error);
-                showStatus('Fout bij inloggen: ' + error.message, 'error');
-            }
-        }
-
-        async function signOut() {
-            if (account) {
-                await msalInstance.logoutRedirect({
-                    account: account
-                });
-            }
-        }
-
-        async function getAccessToken() {
-            if (!account) {
-                throw new Error('Niet ingelogd');
-            }
-
-            const request = {
-                scopes: loginRequest.scopes,
-                account: account
-            };
-
-            try {
-                const response = await msalInstance.acquireTokenSilent(request);
-                return response.accessToken;
-            } catch (error) {
-                if (error instanceof msal.InteractionRequiredAuthError) {
-                    const response = await msalInstance.acquireTokenRedirect(request);
-                    return response.accessToken;
-                } else {
-                    throw error;
-                }
-            }
-        }
-
-        async function uploadCSVToOneDrive(csvContent, fileName) {
-            try {
-                if (!account) {
-                    showStatus('Eerst inloggen bij Microsoft vereist', 'error');
-                    return false;
-                }
-
-                showStatus('Uploaden naar OneDrive...', 'success');
-                
-                const accessToken = await getAccessToken();
-                
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                
-                const uploadUrl = 'https://graph.microsoft.com/v1.0/me/drive/root/children/' + fileName + '/content';
-                
-                const response = await fetch(uploadUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'text/csv'
-                    },
-                    body: blob
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    showStatus(`Bestand ${fileName} succesvol geüpload naar OneDrive!`, 'success');
-                    return true;
-                } else {
-                    const error = await response.text();
-                    console.error('Upload error:', error);
-                    showStatus('Fout bij uploaden: ' + response.statusText, 'error');
-                    return false;
-                }
-                
-            } catch (error) {
-                console.error('OneDrive upload error:', error);
-                showStatus('Fout bij uploaden naar OneDrive: ' + error.message, 'error');
-                return false;
-            }
-        }
-
-        function getUnsentRegistrations() {
-            if (!registrations || registrations.length === 0) {
-                return [];
-            }
-            
-            const lastSentDate = localStorage.getItem('sousvide_last_sent') || '2000-01-01';
-            
-            return registrations.filter(reg => 
-                reg.date > lastSentDate || 
-                (reg.date === lastSentDate && !isRegistrationSent(reg))
-            );
-        }
-
-        async function checkPendingUploadsOnStartup() {
-            console.log('=== STARTUP UPLOAD CHECK ===');
-            
-            if (!account) {
-                console.log('Not logged in, skipping upload check');
-                return;
-            }
-            
-            const unsentRegs = getUnsentRegistrations();
-            const lastUpload = localStorage.getItem('last_upload_time');
-            const lastAppOpen = localStorage.getItem('last_app_open');
-            const now = Date.now();
-            
-            localStorage.setItem('last_app_open', now.toString());
-            
-            console.log(`Unsent registrations: ${unsentRegs.length}`);
-            console.log(`Last upload: ${lastUpload ? new Date(parseInt(lastUpload)).toLocaleString() : 'Never'}`);
-            console.log(`Last app open: ${lastAppOpen ? new Date(parseInt(lastAppOpen)).toLocaleString() : 'Never'}`);
-            
-            const needsUpload = unsentRegs.length > 0 && (
-                !lastUpload ||
-                !lastAppOpen ||
-                (now - parseInt(lastUpload)) > 4 * 60 * 60 * 1000 ||
-                unsentRegs.length >= 10
-            );
-            
-            if (needsUpload) {
-                console.log(`✅ Upload needed: ${unsentRegs.length} registrations`);
-                showStatus(`${unsentRegs.length} registratie(s) uploaden bij opstarten...`, 'success');
-                
-                const success = await sendDataToOneDrive();
-                
-                if (success) {
-                    localStorage.setItem('last_upload_time', now.toString());
-                    showStatus(`✅ ${unsentRegs.length} registratie(s) geüpload bij opstarten!`, 'success');
-                } else {
-                    showStatus('❌ Upload bij opstarten mislukt - probeer handmatig', 'error');
-                }
-            } else {
-                console.log('No upload needed at startup');
-                if (unsentRegs.length > 0) {
-                    showStatus(`${unsentRegs.length} registratie(s) wachten op upload`, 'success');
-                }
-            }
-            
-            const removedCount = cleanupOldData();
-            if (removedCount > 0) {
-                console.log(`Cleaned up ${removedCount} old registrations`);
-            }
-        }
-
-        function performMaintenanceIfNeeded() {
-            const lastMaintenance = localStorage.getItem('last_maintenance');
-            const now = Date.now();
-            const ONE_DAY = 24 * 60 * 60 * 1000;
-            
-            if (!lastMaintenance || (now - parseInt(lastMaintenance)) > ONE_DAY) {
-                console.log('Performing maintenance cleanup...');
-                
-                const removedCount = cleanupOldData();
-                if (removedCount > 0) {
-                    console.log(`Maintenance: cleaned up ${removedCount} old registrations`);
-                }
-                
-                localStorage.setItem('last_maintenance', now.toString());
-            }
-        }
-
-        function updateUIForSignedInUser() {
-            if (account) {
-                updateSendButton();
-                showStatus(`Ingelogd als ${account.name || account.username}`, 'success');
-                
-                const overlay = document.getElementById('login-overlay');
-                if (overlay) {
-                    overlay.remove();
-                }
-            }
-        }
-
-        function updateSendButton() {
-            const sendButton = document.getElementById('send-data-btn');
-            if (sendButton && account) {
-                sendButton.textContent = 'Versturen naar OneDrive';
-                sendButton.onclick = sendDataToOneDrive;
-            }
-        }
-
-        function updateAuthButtons() {
-            const signInBtn = document.getElementById('sign-in-btn');
-            const signOutBtn = document.getElementById('sign-out-btn');
-            const userInfo = document.getElementById('user-info');
-            
-            if (account) {
-                if (signInBtn) signInBtn.style.display = 'none';
-                if (signOutBtn) signOutBtn.style.display = 'block';
-                if (userInfo) userInfo.textContent = account.name || account.username;
-            } else {
-                if (signInBtn) signInBtn.style.display = 'block';
-                if (signOutBtn) signOutBtn.style.display = 'none';
-                if (userInfo) userInfo.textContent = '';
-            }
-        }
-
-        async function sendDataToOneDrive() {
-            if (!registrations || registrations.length === 0) {
-                showStatus('Geen gegevens om te versturen', 'error');
-                return false;
-            }
-            
-            if (!account) {
-                showStatus('Eerst inloggen bij Microsoft', 'error');
-                await signInToMicrosoft();
-                return false;
-            }
-            
-            const lastSentDate = localStorage.getItem('sousvide_last_sent') || '2000-01-01';
-            const newRegistrations = registrations.filter(reg => 
-                reg.date > lastSentDate || 
-                (reg.date === lastSentDate && !isRegistrationSent(reg))
-            );
-            
-            if (newRegistrations.length === 0) {
-                const removedCount = cleanupOldData();
-                if (removedCount > 0) {
-                    showStatus(`Alle gegevens zijn al verzonden. ${removedCount} oude registraties opgeruimd.`, 'success');
-                } else {
-                    showStatus('Alle gegevens zijn al verzonden', 'error');
-                }
-                return false;
-            }
-            
-            let csvContent = 'Werknemer;Afdeling;Datum;Tijd;Activiteit;Uren\n';
-            
-            newRegistrations.forEach(reg => {
-                if (reg.hours && typeof reg.hours === 'object') {
-                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                            Object.entries(activities).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${reg.time || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                            });
-                        });
-                    } else {
-                        Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${reg.time || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                        });
-                    }
-                }
-            });
-            
-            if (csvContent === 'Werknemer;Afdeling;Datum;Tijd;Activiteit;Uren\n') {
-                showStatus('Geen geldige gegevens om te versturen', 'error');
-                return false;
-            }
-            
-            const now = new Date();
-            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,8).replace(/:/g, '')}`;
-            const fileName = `tijdregistratie_versturen_${timestamp}.csv`;
-            
-            const success = await uploadCSVToOneDrive(csvContent, fileName);
-            
-            if (success) {
-                markRegistrationsAsSent(newRegistrations);
-                const today = new Date().toISOString().split('T')[0];
-                localStorage.setItem('sousvide_last_sent', today);
-                
-                const removedCount = cleanupOldData();
-                let statusMessage = `${newRegistrations.length} nieuwe registraties naar OneDrive verzonden!`;
-                if (removedCount > 0) {
-                    statusMessage += ` ${removedCount} oude registraties opgeruimd.`;
-                }
-                
-                showStatus(statusMessage, 'success');
-                updateDataPreview();
-                return true;
-            }
-            
-            return false;
-        }
-
-        function openEmployeeModal() {
-            document.getElementById('employee-modal').classList.add('show');
-        }
-
-        function closeEmployeeModal() {
-            document.getElementById('employee-modal').classList.remove('show');
-        }
-
-        window.onclick = function(event) {
-            const employeeModal = document.getElementById('employee-modal');
-            const hoursModal = document.getElementById('hours-modal');
-            
-            if (event.target === employeeModal) {
-                closeEmployeeModal();
-            }
-            if (event.target === hoursModal) {
-                closeHoursModal();
-            }
-        }
-
-        function toggleDataManagement() {
-            const managementEl = document.getElementById('data-management');
-            const btnEl = event.target;
-            
-            if (managementEl.classList.contains('hidden')) {
-                managementEl.classList.remove('hidden');
-                btnEl.textContent = 'Verberg opties';
-            } else {
-                managementEl.classList.add('hidden');
-                btnEl.textContent = 'Beheer opties';
-            }
-        }
-
-        function loadEmployees() {
-            const savedEmployees = localStorage.getItem('sousvide_employees');
-            if (savedEmployees) {
-                employees = JSON.parse(savedEmployees);
-            }
-            updateEmployeeList();
-            updateEmployeeGrid();
-        }
-
-        function saveEmployees() {
-            localStorage.setItem('sousvide_employees', JSON.stringify(employees));
-        }
-
-        function updateEmployeeList() {
-            const listEl = document.getElementById('employee-list');
-            listEl.innerHTML = '';
-            
-            employees.forEach(employee => {
-                const item = document.createElement('div');
-                item.className = 'employee-item';
-                item.innerHTML = `
-                    <span>${employee}</span>
-                    <button class="btn-remove" onclick="removeEmployee('${employee}')">Verwijder</button>
-                `;
-                listEl.appendChild(item);
-            });
-        }
-
-        function updateEmployeeGrid() {
-            const gridEl = document.getElementById('employee-grid');
-            gridEl.innerHTML = '';
-            
-            employees.forEach(employee => {
-                const btn = document.createElement('button');
-                btn.className = 'employee-btn';
-                btn.textContent = employee;
-                btn.onclick = () => selectEmployee(employee);
-                gridEl.appendChild(btn);
-            });
-        }
-
-        function addEmployee() {
-            const nameInput = document.getElementById('new-employee-name');
-            const name = nameInput.value.trim();
-            
-            if (!name) {
-                showStatus('Voer een naam in', 'error');
-                return;
-            }
-            
-            if (employees.includes(name)) {
-                showStatus('Deze werknemer bestaat al', 'error');
-                return;
-            }
-            
-            employees.push(name);
-            employees.sort();
-            saveEmployees();
-            updateEmployeeList();
-            updateEmployeeGrid();
-            
-            nameInput.value = '';
-            showStatus(`${name} toegevoegd`, 'success');
-        }
-
-        function removeEmployee(name) {
-            if (confirm(`Weet je zeker dat je ${name} wilt verwijderen?`)) {
-                employees = employees.filter(emp => emp !== name);
-                saveEmployees();
-                updateEmployeeList();
-                updateEmployeeGrid();
-                showStatus(`${name} verwijderd`, 'success');
-            }
-        }
-
-        function selectEmployee(name) {
-            document.querySelectorAll('#employee-grid .employee-btn').forEach(btn => btn.classList.remove('selected'));
-            event.target.classList.add('selected');
-            currentEmployee = name;
-            currentWorkLine = null;
-            multiWorkLineData = {};
-            
-            document.getElementById('workline-selection').classList.remove('hidden');
-            document.getElementById('hours-registration').classList.add('hidden');
-            document.getElementById('total-overview').classList.add('hidden');
-            
-            document.querySelectorAll('#workline-grid .workline-btn').forEach(btn => btn.classList.remove('selected'));
-        }
-
-        function selectWorkLine(workLineKey) {
-            console.log('selectWorkLine called:', workLineKey);
-            
-            if (currentWorkLine) {
-                saveCurrentWorkLineData();
-            }
-            
-            document.querySelectorAll('#workline-grid .workline-btn').forEach(btn => btn.classList.remove('selected'));
-            event.target.classList.add('selected');
-            currentWorkLine = workLineKey;
-            
-            const workLine = workLines[workLineKey];
-            document.getElementById('hours-registration').classList.remove('hidden');
-            document.getElementById('total-overview').classList.remove('hidden');
-            
-            generateActivitiesTable(workLine.activities);
-            loadWorkLineData(workLineKey);
-            updateTotalOverview();
-        }
-
-        function saveCurrentWorkLineData() {
-            if (!currentWorkLine) return;
-            
-            const activities = workLines[currentWorkLine].activities;
-            const workLineData = {};
-            
-            activities.forEach(activity => {
-                const inputId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
-                const input = document.getElementById(inputId);
-                if (input && input.value && input.value !== '0') {
-                    const hours = parseFloat(input.value);
-                    if (hours > 0) {
-                        let activityName = activity;
-                        if (activity.toLowerCase() === 'overig') {
-                            const descriptionInput = document.getElementById(inputId + '-description');
-                            if (descriptionInput && descriptionInput.value.trim()) {
-                                activityName = `Overig: ${descriptionInput.value.trim()}`;
-                            }
-                        }
-                        workLineData[activityName] = hours;
-                    }
-                }
-            });
-            
-            if (Object.keys(workLineData).length > 0) {
-                multiWorkLineData[currentWorkLine] = workLineData;
-            } else {
-                delete multiWorkLineData[currentWorkLine];
-            }
-        }
-
-        function loadWorkLineData(workLineKey) {
-            const activities = workLines[workLineKey].activities;
-            
-            activities.forEach(activity => {
-                const inputId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
-                const input = document.getElementById(inputId);
-                if (input) {
-                    let savedHours = 0;
-                    let savedDescription = '';
-                    
-                    if (multiWorkLineData[workLineKey]) {
-                        if (multiWorkLineData[workLineKey][activity]) {
-                            savedHours = multiWorkLineData[workLineKey][activity];
-                        } else if (activity.toLowerCase() === 'overig') {
-                            for (let key in multiWorkLineData[workLineKey]) {
-                                if (key.startsWith('Overig:')) {
-                                    savedHours = multiWorkLineData[workLineKey][key];
-                                    savedDescription = key.substring(7).trim();
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    
-                    input.value = savedHours;
-                    
-                    if (activity.toLowerCase() === 'overig' && savedDescription) {
-                        const descriptionInput = document.getElementById(inputId + '-description');
-                        if (descriptionInput) {
-                            descriptionInput.value = savedDescription;
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateTotalOverview() {
-            const overviewEl = document.getElementById('total-overview');
-            const totalsEl = document.getElementById('workline-totals');
-            
-            if (currentWorkLine) {
-                saveCurrentWorkLineData();
-            }
-            
-            totalsEl.innerHTML = '';
-            
-            let grandTotal = 0;
-            
-            Object.entries(multiWorkLineData).forEach(([workLineKey, activities]) => {
-                const workLineName = workLines[workLineKey].name;
-                const workLineTotal = Object.values(activities).reduce((sum, hours) => sum + hours, 0);
-                grandTotal += workLineTotal;
-                
-                const workLineDiv = document.createElement('div');
-                workLineDiv.className = 'workline-total';
-                workLineDiv.innerHTML = `
-                    <div class="name">${workLineName}</div>
-                    <div class="hours">${workLineTotal.toFixed(2)}u</div>
-                `;
-                totalsEl.appendChild(workLineDiv);
-            });
-            
-            const grandTotalDiv = document.createElement('div');
-            grandTotalDiv.className = grandTotal > 8 ? 'grand-total warning' : 'grand-total';
-            grandTotalDiv.innerHTML = `
-                <div class="name">TOTAAL</div>
-                <div class="hours">${grandTotal.toFixed(2)}u</div>
-            `;
-            totalsEl.appendChild(grandTotalDiv);
-            
-            if (currentWorkLine) {
-                overviewEl.classList.remove('hidden');
-            } else {
-                overviewEl.classList.add('hidden');
-            }
-        }
-
-        function generateActivitiesTable(activities) {
-            const tbody = document.getElementById('activities-tbody');
-            tbody.innerHTML = '';
-            
-            activities.forEach(activity => {
-                const activityId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
-                const row = document.createElement('tr');
-                
-                const isOverig = activity.toLowerCase() === 'overig';
-                const activityDisplay = isOverig ? 
-                    `<input type="text" placeholder="Overig, Namelijk:" id="${activityId}-description" 
-                     class="overig-description">` : 
-                    activity;
-                
-                row.innerHTML = `
-                    <td>${activityDisplay}</td>
-                    <td>
-                        <div class="hour-controls">
-                            <button class="btn-fullday" onclick="setFullDay('${activityId}')">Hele dag</button>
-                            <div class="hour-buttons-group">
-                                <button class="hour-btn minus" onclick="changeHours('${activityId}', -1)">-1</button>
-                                <button class="hour-btn minus" onclick="changeHours('${activityId}', -0.25)">-0,25</button>
-                                <input type="number" class="hour-input" id="${activityId}" min="0" max="12" step="0.25" value="0" readonly>
-                                <button class="hour-btn plus" onclick="changeHours('${activityId}', 0.25)">+0,25</button>
-                                <button class="hour-btn plus" onclick="changeHours('${activityId}', 1)">+1</button>
-                                <button class="hour-btn plus" onclick="changeHours('${activityId}', 4)">+4</button>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <button class="btn-clear" onclick="clearHours('${activityId}')">Wis</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function changeHours(inputId, change) {
-            const input = document.getElementById(inputId);
-            const currentValue = parseFloat(input.value) || 0;
-            const newValue = Math.max(0, Math.min(12, currentValue + change));
-            input.value = newValue;
-            updateTotalOverview();
-        }
-
-        function setFullDay(inputId) {
-            clearAllHours();
-            document.getElementById(inputId).value = '7.5';
-            updateTotalOverview();
-        }
-
-        function clearHours(inputId) {
-            document.getElementById(inputId).value = '0';
-            updateTotalOverview();
-        }
-
-        function clearAllHours() {
-            if (!currentWorkLine) return;
-            
-            const activities = workLines[currentWorkLine].activities;
-            activities.forEach(activity => {
-                const inputId = activity.toLowerCase().replace(/[^a-z0-9]/g, '') + '-hours';
-                const input = document.getElementById(inputId);
-                if (input) {
-                    input.value = '0';
-                }
-            });
-        }
-
-        async function intelligentUpload() {
-            const unsentRegs = getUnsentRegistrations();
-            const lastUpload = localStorage.getItem('last_upload_time');
-            const now = Date.now();
-            
-            const shouldUpload = 
-                unsentRegs.length >= 10 ||
-                (lastUpload && (now - parseInt(lastUpload)) > 4 * 60 * 60 * 1000) ||
-                !lastUpload;
-            
-            if (shouldUpload && unsentRegs.length > 0) {
-                showStatus('Uploaden batch naar OneDrive...', 'success');
-                const success = await sendDataToOneDrive();
-                
-                if (success) {
-                    localStorage.setItem('last_upload_time', now.toString());
-                    showStatus(`${unsentRegs.length} registraties geüpload!`, 'success');
-                } else {
-                    showStatus('Upload mislukt - probeer later opnieuw', 'error');
-                }
-            } else {
-                showStatus('Registratie opgeslagen', 'success');
-            }
-        }
-
-        async function saveRegistration() {
-            if (!currentEmployee) return;
-            
-            saveCurrentWorkLineData();
-            
-            if (Object.keys(multiWorkLineData).length === 0) {
-                showStatus('Voer minimaal één activiteit in', 'error');
-                return;
-            }
-            
-            let totalHours = 0;
-            const workLineNames = [];
-            
-            Object.entries(multiWorkLineData).forEach(([workLineKey, activities]) => {
-                workLineNames.push(workLines[workLineKey].name);
-                Object.values(activities).forEach(hours => {
-                    totalHours += hours;
-                });
-            });
-            
-            const registration = {
-                employee: currentEmployee,
-                workLineNames: workLineNames,
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
-                hours: multiWorkLineData,
-                total: totalHours
-            };
-            
-            registrations.unshift(registration);
-            localStorage.setItem('sousvide_registrations', JSON.stringify(registrations));
-            
-            if (account) {
-                await intelligentUpload();
-            } else {
-                showStatus('⚠️ Opgeslagen lokaal - login voor automatische upload', 'error');
-            }
-            
-            resetSelection();
-            updateDataPreview();
-            
-            // Update planning tabel als deze zichtbaar is
-            updatePlanningWithNewRegistration();
-        }
-
-        function resetSelection() {
-            currentEmployee = null;
-            currentWorkLine = null;
-            multiWorkLineData = {};
-            document.querySelectorAll('.employee-btn').forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('workline-selection').classList.add('hidden');
-            document.getElementById('hours-registration').classList.add('hidden');
-            document.getElementById('total-overview').classList.add('hidden');
-        }
-
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('status-message');
-            statusEl.textContent = message;
-            statusEl.className = `status ${type}`;
-            
-            setTimeout(() => {
-                statusEl.textContent = '';
-                statusEl.className = '';
-            }, 4000);
+            showStatus(`✅ Uren bijgewerkt voor ${employeeName} op ${dateText} (${totalHours.toFixed(2)}u totaal)!`, 'success');
         }
 
         function updateDataPreview() {
-            const today = new Date().toISOString().split('T')[0];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDateString = today.toISOString().split('T')[0]; // Always show today's data in preview
             
             const employeeTotalsPreview = document.getElementById('employee-totals-preview');
             if (employeeTotalsPreview) employeeTotalsPreview.textContent = 'Nog geen registraties';
@@ -3120,14 +2360,14 @@
             sortedRegistrations.forEach(reg => {
                 if (!reg.hours) return;
                 
-                const isToday = reg.date === today;
+                const isSelectedDate = reg.date === selectedDateString;
                 
                 if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
                     Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
                         const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
                         
                         Object.entries(activities).forEach(([activity, hours]) => {
-                            if (isToday) {
+                            if (isSelectedDate) {
                                 if (!employeeTotals[reg.employee]) {
                                     employeeTotals[reg.employee] = { totalHours: 0, details: [] };
                                 }
@@ -3138,7 +2378,7 @@
                     });
                 } else if (reg.workLineName) {
                     Object.entries(reg.hours).forEach(([activity, hours]) => {
-                        if (isToday) {
+                        if (isSelectedDate) {
                             if (!employeeTotals[reg.employee]) {
                                 employeeTotals[reg.employee] = { totalHours: 0, details: [] };
                             }
@@ -3167,102 +2407,7 @@
         }
 
         function sendData() {
-            if (account) {
-                sendDataToOneDrive();
-                return;
-            }
-            
-            if (!registrations || registrations.length === 0) {
-                showStatus('Geen gegevens om te versturen', 'error');
-                return;
-            }
-            
-            const lastSentDate = localStorage.getItem('sousvide_last_sent') || '2000-01-01';
-            
-            const newRegistrations = registrations.filter(reg => 
-                reg.date > lastSentDate || 
-                (reg.date === lastSentDate && !isRegistrationSent(reg))
-            );
-            
-            if (newRegistrations.length === 0) {
-                const removedCount = cleanupOldData();
-                if (removedCount > 0) {
-                    showStatus(`Alle gegevens zijn al verzonden. ${removedCount} oude registraties opgeruimd (ouder dan 35 dagen).`, 'success');
-                } else {
-                    showStatus('Alle gegevens zijn al verzonden', 'error');
-                }
-                return;
-            }
-            
-            let csvContent = 'Werknemer;Afdeling;Datum;Tijd;Activiteit;Uren\n';
-            
-            newRegistrations.forEach(reg => {
-                if (reg.hours && typeof reg.hours === 'object') {
-                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                            Object.entries(activities).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${reg.time || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                            });
-                        });
-                    } else {
-                        Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${reg.time || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                        });
-                    }
-                }
-            });
-            
-            if (csvContent === 'Werknemer;Afdeling;Datum;Tijd;Activiteit;Uren\n') {
-                showStatus('Geen geldige gegevens om te versturen', 'error');
-                return;
-            }
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const now = new Date();
-            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
-            link.setAttribute('href', url);
-            link.setAttribute('download', `tijdregistratie_versturen_${timestamp}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            markRegistrationsAsSent(newRegistrations);
-            
-            const today = new Date().toISOString().split('T')[0];
-            localStorage.setItem('sousvide_last_sent', today);
-            
-            const removedCount = cleanupOldData();
-            
-            let statusMessage = `${newRegistrations.length} nieuwe registraties verzonden!`;
-            if (removedCount > 0) {
-                statusMessage += ` ${removedCount} oude registraties opgeruimd (ouder dan 35 dagen).`;
-            }
-            
-            showStatus(statusMessage, 'success');
-            updateDataPreview();
-        }
-        
-        function isRegistrationSent(registration) {
-            const sentRegistrations = JSON.parse(localStorage.getItem('sousvide_sent_registrations') || '[]');
-            const regId = `${registration.employee}_${registration.date}_${registration.time}`;
-            return sentRegistrations.includes(regId);
-        }
-        
-        function markRegistrationsAsSent(registrations) {
-            const sentRegistrations = JSON.parse(localStorage.getItem('sousvide_sent_registrations') || '[]');
-            
-            registrations.forEach(reg => {
-                const regId = `${reg.employee}_${reg.date}_${reg.time}`;
-                if (!sentRegistrations.includes(regId)) {
-                    sentRegistrations.push(regId);
-                }
-            });
-            
-            localStorage.setItem('sousvide_sent_registrations', JSON.stringify(sentRegistrations));
+            showStatus('Functie in ontwikkeling...', 'error');
         }
 
         function downloadCSV() {
@@ -3310,24 +2455,6 @@
             showStatus('CSV gedownload!', 'success');
         }
 
-        function cleanupOldData() {
-            const thirtyFiveDaysAgo = new Date();
-            thirtyFiveDaysAgo.setDate(thirtyFiveDaysAgo.getDate() - 35);
-            const cutoffDate = thirtyFiveDaysAgo.toISOString().split('T')[0];
-            
-            const originalCount = registrations.length;
-            registrations = registrations.filter(reg => reg.date >= cutoffDate);
-            const removedCount = originalCount - registrations.length;
-            
-            if (removedCount > 0) {
-                localStorage.setItem('sousvide_registrations', JSON.stringify(registrations));
-                updateDataPreview();
-                console.log(`${removedCount} oude registraties opgeruimd (ouder dan ${cutoffDate})`);
-                return removedCount;
-            }
-            return 0;
-        }
-
         function loadData() {
             try {
                 const savedData = localStorage.getItem('sousvide_registrations');
@@ -3339,15 +2466,32 @@
                     updateDataPreview();
                 }
             } catch (error) {
-                console.error('Fout bij laden data:', error);
                 registrations = [];
                 localStorage.removeItem('sousvide_registrations');
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, starting initialization...');
+        async function signInToMicrosoft() {
+            showStatus('Microsoft login functie in ontwikkeling...', 'error');
+        }
+
+        function signOut() {
+            showStatus('Uitloggen functie in ontwikkeling...', 'error');
+        }
+
+        window.onclick = function(event) {
+            const employeeModal = document.getElementById('employee-modal');
+            const hoursModal = document.getElementById('hours-modal');
             
+            if (event.target === employeeModal) {
+                closeEmployeeModal();
+            }
+            if (event.target === hoursModal) {
+                closeHoursModal();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
             const nameInput = document.getElementById('new-employee-name');
             if (nameInput) {
                 nameInput.addEventListener('keypress', function(e) {
@@ -3357,18 +2501,10 @@
                 });
             }
             
+            initializeDates();
             loadEmployees();
             loadData();
-            
-            console.log('Starting MSAL initialization...');
-            initializeMSAL().then(() => {
-                setTimeout(() => {
-                    checkPendingUploadsOnStartup();
-                    performMaintenanceIfNeeded();
-                }, 2000);
-            });
         });
     </script>
 </body>
 </html>
-                                    
