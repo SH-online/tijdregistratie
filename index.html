@@ -424,19 +424,49 @@
             border-right: none;
         }
 
-        .planning-table th.werkelijk-header {
-            background: #28a745 !important;
+        .planning-table th.werkelijk-header.status-empty {
+            background: #dc3545 !important; /* Rood - nog niets ingevuld */
+        }
+
+        .planning-table th.werkelijk-header.status-partial {
+            background: #ffc107 !important; /* Geel - alles ingevuld maar afwijkingen */
+            color: #212529 !important;
+        }
+
+        .planning-table th.werkelijk-header.status-complete {
+            background: #28a745 !important; /* Groen - alles correct */
         }
 
         .planning-table td.werkelijk-cell {
-            background: #d4edda;
             font-weight: 600;
-            color: #155724;
+            color: white;
+        }
+
+        .planning-table td.werkelijk-cell.exact {
+            background: #28a745;
+            color: white;
+        }
+
+        .planning-table td.werkelijk-cell.close {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .planning-table td.werkelijk-cell.far {
+            background: #dc3545;
+            color: white;
         }
 
         .planning-table td.werkelijk-cell.empty {
             background: #f8f9fa;
             color: #6c757d;
+            font-weight: normal;
+        }
+
+        .planning-table td.werkelijk-cell.pending {
+            background: #0063ac;
+            color: white;
+            font-weight: 600;
         }
 
         .planning-table td.clickable-name-cell {
@@ -761,7 +791,6 @@
             gap: 20px;
             justify-content: flex-start;
             width: 100%;
-            flex-wrap: wrap;
         }
 
         .hour-buttons-group {
@@ -897,18 +926,23 @@
         .btn-fullday {
             background: #FF9800;
             color: white;
-            padding: 10px 18px;
+            width: 75px;
+            height: 65px;
+            border: 2px solid #FF9800;
+            border-radius: 10px;
             font-size: 1em;
-            border: none;
-            border-radius: 6px;
+            font-weight: 600;
             cursor: pointer;
-            min-height: 44px;
-            font-weight: 500;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
         }
 
         .btn-fullday:hover {
             background: #F57C00;
+            border-color: #F57C00;
             transform: translateY(-1px);
         }
 
@@ -1730,6 +1764,9 @@
             tableHead.innerHTML = '';
             const headerRow = document.createElement('tr');
             
+            // Track column status for header coloring
+            const columnStatus = {};
+            
             planningHeader.forEach((col, index) => {
                 if (index === 0 || index === 1) return;
                 
@@ -1740,8 +1777,16 @@
                 if (col.includes('plan')) {
                     const thWerkelijk = document.createElement('th');
                     thWerkelijk.textContent = col.replace('plan', 'uren');
-                    thWerkelijk.style.background = '#28a745';
                     thWerkelijk.className = 'werkelijk-header';
+                    
+                    // We'll set the status class after analyzing all data
+                    columnStatus[col] = { 
+                        element: thWerkelijk, 
+                        hasData: false, 
+                        hasIssues: false, 
+                        hasPending: false 
+                    };
+                    
                     headerRow.appendChild(thWerkelijk);
                 }
             });
@@ -1800,18 +1845,71 @@
                         
                         const werkelijkeUren = getWerkelijkeUren(emp.Naam || emp.naam, dag);
                         
+                        // Better parsing of planned hours - handle both comma and dot decimals
+                        let geplandeUrenString = emp[col] || '0';
+                        if (typeof geplandeUrenString === 'string') {
+                            // Replace comma with dot for decimal parsing
+                            geplandeUrenString = geplandeUrenString.replace(',', '.');
+                        }
+                        const geplandeUren = parseFloat(geplandeUrenString) || 0;
+                        
                         werkelijkCell.textContent = werkelijkeUren > 0 ? werkelijkeUren.toFixed(2) : '-';
                         
                         if (werkelijkeUren > 0) {
-                            werkelijkCell.className = 'werkelijk-cell';
+                            // Round both values to 2 decimal places for accurate comparison
+                            const werkelijkRounded = Math.round(werkelijkeUren * 100) / 100;
+                            const geplandRounded = Math.round(geplandeUren * 100) / 100;
+                            const afwijking = Math.abs(werkelijkRounded - geplandRounded);
+                            
+                            columnStatus[col].hasData = true;
+                            
+                            if (afwijking < 0.01) { // Practically zero (accounting for floating point)
+                                werkelijkCell.className = 'werkelijk-cell exact';
+                            } else if (afwijking <= 1.0) {
+                                werkelijkCell.className = 'werkelijk-cell close';
+                                columnStatus[col].hasIssues = true;
+                            } else {
+                                werkelijkCell.className = 'werkelijk-cell far';
+                                columnStatus[col].hasIssues = true;
+                            }
                         } else {
-                            werkelijkCell.className = 'werkelijk-cell empty';
+                            // Check if this is today and there are planned hours
+                            const today = new Date();
+                            const dagNummers = {
+                                'maandag': 1, 'dinsdag': 2, 'woensdag': 3, 'donderdag': 4, 'vrijdag': 5
+                            };
+                            const isToday = today.getDay() === dagNummers[dag];
+                            
+                            if (isToday && geplandeUren > 0) {
+                                werkelijkCell.className = 'werkelijk-cell pending';
+                                werkelijkCell.textContent = '-';
+                                columnStatus[col].hasPending = true;
+                            } else if (geplandeUren > 0) {
+                                werkelijkCell.className = 'werkelijk-cell empty';
+                                columnStatus[col].hasIssues = true; // Missing data counts as issue
+                            } else {
+                                werkelijkCell.className = 'werkelijk-cell empty';
+                            }
                         }
                         
                         row.appendChild(werkelijkCell);
                     }
                 });
                 tableBody.appendChild(row);
+            });
+            
+            // Apply status classes to column headers
+            Object.entries(columnStatus).forEach(([col, status]) => {
+                if (status.hasPending || !status.hasData) {
+                    // Red: nothing filled in or pending items
+                    status.element.classList.add('status-empty');
+                } else if (status.hasIssues) {
+                    // Yellow: everything filled but has issues
+                    status.element.classList.add('status-partial');
+                } else {
+                    // Green: everything correct
+                    status.element.classList.add('status-complete');
+                }
             });
             
             updatePlanningInfo();
@@ -2120,7 +2218,6 @@
                     <td>${activityDisplay}</td>
                     <td>
                         <div class="hour-controls">
-                            <button class="btn-fullday" onclick="setFullDayInModal('${activityId}')">Hele dag</button>
                             <div class="hour-buttons-group">
                                 <button class="hour-btn minus" onclick="changeHoursInModal('${activityId}', -1)">-1</button>
                                 <button class="hour-btn minus" onclick="changeHoursInModal('${activityId}', -0.25)">-0,25</button>
@@ -2128,6 +2225,7 @@
                                 <button class="hour-btn plus" onclick="changeHoursInModal('${activityId}', 0.25)">+0,25</button>
                                 <button class="hour-btn plus" onclick="changeHoursInModal('${activityId}', 1)">+1</button>
                                 <button class="hour-btn plus" onclick="changeHoursInModal('${activityId}', 4)">+4</button>
+                                <button class="btn-fullday" onclick="setFullDayInModal('${activityId}')">Dag</button>
                             </div>
                         </div>
                     </td>
@@ -2149,7 +2247,21 @@
 
         function setFullDayInModal(inputId) {
             clearAllHoursInModal();
-            document.getElementById(inputId).value = '7.5';
+            
+            // Determine hours based on day of week
+            const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 5 = Friday
+            let hours;
+            
+            if (dayOfWeek === 5) { // Friday
+                hours = '8';
+            } else if (dayOfWeek >= 1 && dayOfWeek <= 4) { // Monday to Thursday
+                hours = '7.5';
+            } else {
+                // Weekend (shouldn't happen in this app, but default to 7.5)
+                hours = '7.5';
+            }
+            
+            document.getElementById(inputId).value = hours;
             updateTotalOverviewInModal();
         }
 
@@ -2244,8 +2356,105 @@
             // This function is no longer needed since we removed the data preview
         }
 
-        function sendData() {
-            showStatus('Functie in ontwikkeling...', 'error');
+        async function sendData() {
+            if (!registrations || registrations.length === 0) {
+                showStatus('Geen data om te versturen', 'error');
+                return;
+            }
+
+            if (!account) {
+                showStatus('Log eerst in bij Microsoft om gegevens te versturen', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Gegevens versturen...', 'success');
+
+                // Get access token for Microsoft Graph API
+                const tokenRequest = {
+                    scopes: ['Files.ReadWrite'],
+                    account: account
+                };
+
+                const tokenResponse = await msalInstance.acquireTokenSilent(tokenRequest);
+                const accessToken = tokenResponse.accessToken;
+
+                // Prepare CSV data
+                let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
+                
+                registrations.forEach(reg => {
+                    if (reg.hours && typeof reg.hours === 'object') {
+                        if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                            Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                                const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                                Object.entries(activities).forEach(([activity, hours]) => {
+                                    csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+                                });
+                            });
+                        } else {
+                            Object.entries(reg.hours).forEach(([activity, hours]) => {
+                                csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+                            });
+                        }
+                    }
+                });
+
+                // Create filename with timestamp
+                const now = new Date();
+                const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
+                const filename = `tijdregistratie_${timestamp}.csv`;
+
+                // Convert to base64
+                const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const reader = new FileReader();
+                
+                reader.onload = async function() {
+                    const base64Data = reader.result.split(',')[1];
+                    
+                    // Upload to OneDrive
+                    const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/${filename}:/content`;
+                    
+                    const uploadResponse = await fetch(uploadUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'text/csv'
+                        },
+                        body: csvContent
+                    });
+
+                    if (uploadResponse.ok) {
+                        const result = await uploadResponse.json();
+                        showStatus(`✅ Gegevens succesvol verstuurd naar OneDrive als ${filename}`, 'success');
+                        
+                        // Optional: Clear local data after successful upload
+                        // if (confirm('Gegevens zijn verstuurd. Lokale data wissen?')) {
+                        //     registrations = [];
+                        //     localStorage.removeItem('sousvide_registrations');
+                        // }
+                        
+                    } else {
+                        throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+                    }
+                };
+                
+                reader.readAsDataURL(csvBlob);
+
+            } catch (error) {
+                console.error('Send data error:', error);
+                if (error.message.includes('interaction_required')) {
+                    // Token expired, try interactive login
+                    try {
+                        await msalInstance.acquireTokenPopup(tokenRequest);
+                        // Retry sending data
+                        setTimeout(() => sendData(), 1000);
+                    } catch (loginError) {
+                        showStatus('Inloggen mislukt. Probeer opnieuw in te loggen.', 'error');
+                    }
+                } else {
+                    showStatus('Fout bij versturen gegevens: ' + error.message, 'error');
+                }
+            }
         }
 
         function downloadCSV() {
