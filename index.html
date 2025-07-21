@@ -1262,44 +1262,17 @@
             </div>
         </div>
 
-        <div class="modal" id="employee-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Beheer werknemers</h2>
-                    <button class="btn-close" onclick="closeEmployeeModal()">&times;</button>
-                </div>
-                
-                <div class="add-employee-row">
-                    <input type="text" id="new-employee-name" class="employee-input" placeholder="Nieuwe werknemer naam...">
-                    <button class="btn-add" onclick="addEmployee()">Toevoegen</button>
-                </div>
-                
-                <div class="employee-list" id="employee-list">
-                </div>
-            </div>
-        </div>
+
 
         <div id="status-message"></div>
 
         <div class="section">
-            <div class="data-overview">
-                <div style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 15px; color: #495057; font-size: 1.4em; font-weight: 600;">
-                        Uren per werknemer (vandaag):
-                    </h3>
-                    <div class="all-registrations-overview">
-                        <pre id="employee-totals-preview">Nog geen registraties</pre>
-                    </div>
-                </div>
-            </div>
-            
             <div class="controls" style="display: flex; justify-content: center;">
                 <button class="btn-uniform btn-yellow" onclick="toggleDataManagement()">Beheer opties</button>
             </div>
             
             <div class="hidden" id="data-management">
                 <div class="controls" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                    <button class="btn-uniform" onclick="openEmployeeModal()">Beheer werknemers</button>
                     <button id="send-data-btn" class="btn-uniform" onclick="sendData()">Gegevens versturen</button>
                     <button class="btn-uniform" onclick="downloadCSV()">Download alle CSV</button>
                 </div>
@@ -1522,14 +1495,6 @@
             }
         }
 
-        function openEmployeeModal() {
-            document.getElementById('employee-modal').classList.add('show');
-        }
-
-        function closeEmployeeModal() {
-            document.getElementById('employee-modal').classList.remove('show');
-        }
-
         function closeHoursModal() {
             document.getElementById('hours-modal').classList.remove('show');
             currentEmployee = null;
@@ -1543,64 +1508,7 @@
             document.getElementById('modal-total-overview').classList.add('hidden');
         }
 
-        function addEmployee() {
-            const nameInput = document.getElementById('new-employee-name');
-            const name = nameInput.value.trim();
-            
-            if (!name) {
-                showStatus('Voer een naam in', 'error');
-                return;
-            }
-            
-            if (employees.includes(name)) {
-                showStatus('Deze werknemer bestaat al', 'error');
-                return;
-            }
-            
-            employees.push(name);
-            employees.sort();
-            saveEmployees();
-            updateEmployeeList();
-            
-            nameInput.value = '';
-            showStatus(`${name} toegevoegd`, 'success');
-        }
 
-        function removeEmployee(name) {
-            if (confirm(`Weet je zeker dat je ${name} wilt verwijderen?`)) {
-                employees = employees.filter(emp => emp !== name);
-                saveEmployees();
-                updateEmployeeList();
-                showStatus(`${name} verwijderd`, 'success');
-            }
-        }
-
-        function saveEmployees() {
-            localStorage.setItem('sousvide_employees', JSON.stringify(employees));
-        }
-
-        function loadEmployees() {
-            const savedEmployees = localStorage.getItem('sousvide_employees');
-            if (savedEmployees) {
-                employees = JSON.parse(savedEmployees);
-            }
-            updateEmployeeList();
-        }
-
-        function updateEmployeeList() {
-            const listEl = document.getElementById('employee-list');
-            listEl.innerHTML = '';
-            
-            employees.forEach(employee => {
-                const item = document.createElement('div');
-                item.className = 'employee-item';
-                item.innerHTML = `
-                    <span>${employee}</span>
-                    <button class="btn-remove" onclick="removeEmployee('${employee}')">Verwijder</button>
-                `;
-                listEl.appendChild(item);
-            });
-        }
 
         function loadPlanningCSV(event) {
             const file = event.target.files[0];
@@ -2325,8 +2233,6 @@
             
             closeHoursModal();
             
-            updateDataPreview();
-            
             if (planningData.length > 0) {
                 displayPlanningTable();
             }
@@ -2335,75 +2241,7 @@
         }
 
         function updateDataPreview() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const selectedDateString = today.toISOString().split('T')[0]; // Always show today's data in preview
-            
-            const employeeTotalsPreview = document.getElementById('employee-totals-preview');
-            if (employeeTotalsPreview) employeeTotalsPreview.textContent = 'Nog geen registraties';
-            
-            if (!registrations || registrations.length === 0) {
-                return;
-            }
-            
-            const sortedRegistrations = [...registrations].sort((a, b) => {
-                const dateCompare = new Date(b.date) - new Date(a.date);
-                if (dateCompare !== 0) return dateCompare;
-                
-                const timeA = a.time || '00:00';
-                const timeB = b.time || '00:00';
-                return timeB.localeCompare(timeA);
-            });
-            
-            const employeeTotals = {};
-            
-            sortedRegistrations.forEach(reg => {
-                if (!reg.hours) return;
-                
-                const isSelectedDate = reg.date === selectedDateString;
-                
-                if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                    Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                        const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                        
-                        Object.entries(activities).forEach(([activity, hours]) => {
-                            if (isSelectedDate) {
-                                if (!employeeTotals[reg.employee]) {
-                                    employeeTotals[reg.employee] = { totalHours: 0, details: [] };
-                                }
-                                employeeTotals[reg.employee].totalHours += hours;
-                                employeeTotals[reg.employee].details.push(`${workLineName}: ${activity} (${hours}u)`);
-                            }
-                        });
-                    });
-                } else if (reg.workLineName) {
-                    Object.entries(reg.hours).forEach(([activity, hours]) => {
-                        if (isSelectedDate) {
-                            if (!employeeTotals[reg.employee]) {
-                                employeeTotals[reg.employee] = { totalHours: 0, details: [] };
-                            }
-                            employeeTotals[reg.employee].totalHours += hours;
-                            employeeTotals[reg.employee].details.push(`${reg.workLineName}: ${activity} (${hours}u)`);
-                        }
-                    });
-                }
-            });
-            
-            if (employeeTotalsPreview) {
-                const employeeLines = [];
-                Object.entries(employeeTotals)
-                    .sort(([a], [b]) => a.localeCompare(b))
-                    .forEach(([employee, data]) => {
-                        const detailsText = data.details.join(', ');
-                        employeeLines.push(`${employee} (${data.totalHours.toFixed(2)}u) - ${detailsText}`);
-                    });
-                
-                if (employeeLines.length > 0) {
-                    employeeTotalsPreview.textContent = employeeLines.join('\n');
-                } else {
-                    employeeTotalsPreview.textContent = 'Nog geen registraties';
-                }
-            }
+            // This function is no longer needed since we removed the data preview
         }
 
         function sendData() {
@@ -2463,7 +2301,6 @@
                     if (!Array.isArray(registrations)) {
                         registrations = [];
                     }
-                    updateDataPreview();
                 }
             } catch (error) {
                 registrations = [];
@@ -2472,38 +2309,88 @@
         }
 
         async function signInToMicrosoft() {
-            showStatus('Microsoft login functie in ontwikkeling...', 'error');
+            try {
+                if (!msalInstance) {
+                    msalInstance = new msal.PublicClientApplication(msalConfig);
+                    await msalInstance.initialize();
+                }
+
+                showStatus('Inloggen bij Microsoft...', 'success');
+                
+                const loginResponse = await msalInstance.loginPopup(loginRequest);
+                account = loginResponse.account;
+                
+                // Update UI
+                document.getElementById('sign-in-btn').style.display = 'none';
+                document.getElementById('sign-out-btn').style.display = 'block';
+                document.getElementById('user-info').textContent = account.name || account.username;
+                document.getElementById('user-info').style.display = 'block';
+                
+                showStatus(`Welkom ${account.name || account.username}!`, 'success');
+                
+            } catch (error) {
+                console.error('Login failed:', error);
+                showStatus('Inloggen mislukt. Probeer opnieuw.', 'error');
+            }
         }
 
         function signOut() {
-            showStatus('Uitloggen functie in ontwikkeling...', 'error');
+            try {
+                if (msalInstance && account) {
+                    msalInstance.logoutPopup({
+                        account: account
+                    });
+                }
+                
+                // Reset UI
+                document.getElementById('sign-in-btn').style.display = 'block';
+                document.getElementById('sign-out-btn').style.display = 'none';
+                document.getElementById('user-info').style.display = 'none';
+                account = null;
+                
+                showStatus('Uitgelogd', 'success');
+                
+            } catch (error) {
+                console.error('Logout failed:', error);
+                showStatus('Uitloggen mislukt', 'error');
+            }
+        }
+
+        // Check if user is already logged in on page load
+        async function checkExistingLogin() {
+            try {
+                if (!msalInstance) {
+                    msalInstance = new msal.PublicClientApplication(msalConfig);
+                    await msalInstance.initialize();
+                }
+                
+                const accounts = msalInstance.getAllAccounts();
+                if (accounts.length > 0) {
+                    account = accounts[0];
+                    
+                    // Update UI for logged in state
+                    document.getElementById('sign-in-btn').style.display = 'none';
+                    document.getElementById('sign-out-btn').style.display = 'block';
+                    document.getElementById('user-info').textContent = account.name || account.username;
+                    document.getElementById('user-info').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error checking existing login:', error);
+            }
         }
 
         window.onclick = function(event) {
-            const employeeModal = document.getElementById('employee-modal');
             const hoursModal = document.getElementById('hours-modal');
             
-            if (event.target === employeeModal) {
-                closeEmployeeModal();
-            }
             if (event.target === hoursModal) {
                 closeHoursModal();
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const nameInput = document.getElementById('new-employee-name');
-            if (nameInput) {
-                nameInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        addEmployee();
-                    }
-                });
-            }
-            
             initializeDates();
-            loadEmployees();
             loadData();
+            checkExistingLogin(); // Check if user is already logged in
         });
     </script>
 </body>
