@@ -2411,8 +2411,8 @@
                 reader.onload = async function() {
                     const base64Data = reader.result.split(',')[1];
                     
-                    // Upload to OneDrive
-                    const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/${filename}:/content`;
+                    // Upload to OneDrive Autouploads folder
+                    const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/Autouploads/${filename}:/content`;
                     
                     const uploadResponse = await fetch(uploadUrl, {
                         method: 'PUT',
@@ -2425,7 +2425,7 @@
 
                     if (uploadResponse.ok) {
                         const result = await uploadResponse.json();
-                        showStatus(`✅ Gegevens succesvol verstuurd naar OneDrive als ${filename}`, 'success');
+                        showStatus(`✅ Gegevens succesvol verstuurd naar OneDrive/Autouploads als ${filename}`, 'success');
                         
                         // Optional: Clear local data after successful upload
                         // if (confirm('Gegevens zijn verstuurd. Lokale data wissen?')) {
