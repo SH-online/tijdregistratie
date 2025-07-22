@@ -1976,7 +1976,9 @@
             
             const targetDate = new Date(currentWeekStart);
             targetDate.setDate(currentWeekStart.getDate() + dagNummers[dag]);
-            const targetDateString = targetDate.toISOString().split('T')[0];
+            const targetDateString = targetDate.getFullYear() + '-' + 
+    String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + 
+    String(targetDate.getDate()).padStart(2, '0');
             
             let totalHours = 0;
             
@@ -2045,7 +2047,9 @@
         }
 
         function loadExistingRegistrationsForSelectedDate(employeeName) {
-            const selectedDateString = selectedDate.toISOString().split('T')[0];
+            const selectedDateString = selectedDate.getFullYear() + '-' + 
+    String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+    String(selectedDate.getDate()).padStart(2, '0');
             
             const selectedDateRegistrations = registrations.filter(reg => 
                 reg.employee === employeeName && reg.date === selectedDateString
