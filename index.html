@@ -2357,66 +2357,48 @@
         }
 
         // Auto-upload functionality for reliability
+        let uploadQueue = [];
         let isUploading = false;
-        let registrationCount = 0;
-        let lastUploadCount = 0;
+        let lastUploadAttempt = null;
 
-        // Initialize upload system
+        // Check for unsent data and auto-upload periodically
         function initializeAutoUpload() {
-            // Load last upload count from localStorage
-            const savedUploadCount = localStorage.getItem('last_upload_count');
-            if (savedUploadCount) {
-                lastUploadCount = parseInt(savedUploadCount) || 0;
-            }
+            // Try to upload every 10 minutes
+            setInterval(checkAndAutoUpload, 10 * 60 * 1000);
             
-            // Upload before page unload if there are unsent registrations
+            // Also check on page load
+            setTimeout(checkAndAutoUpload, 5000); // Wait 5 seconds after load
+            
+            // Upload before page unload
             window.addEventListener('beforeunload', function(e) {
-                if (hasUnsentRegistrations()) {
+                if (hasUnsentData()) {
                     sendDataReliable();
                     e.preventDefault();
-                    e.returnValue = 'Er zijn nog niet-verstuurde registraties. Weet je zeker dat je de pagina wilt verlaten?';
+                    e.returnValue = 'Er zijn nog niet-verstuurde gegevens. Weet je zeker dat je de pagina wilt verlaten?';
                     return e.returnValue;
                 }
             });
         }
 
-        function hasUnsentRegistrations() {
-            return registrations.length > lastUploadCount;
-        }
-
-        function getUnsentRegistrationsCount() {
-            return Math.max(0, registrations.length - lastUploadCount);
-        }
-
-        // Check if we should auto-upload (every 10 registrations)
-        async function checkAutoUpload() {
-            if (isUploading) return;
+        function hasUnsentData() {
+            if (!registrations || registrations.length === 0) return false;
             
-            if (!account) {
-                console.log('Auto-upload skipped: not logged in');
-                return;
-            }
+            // Check if we have data from today that hasn't been uploaded recently
+            const today = new Date().toISOString().split('T')[0];
+            const hasDataFromToday = registrations.some(reg => reg.date === today);
             
-            const unsentCount = getUnsentRegistrationsCount();
-            if (unsentCount >= 10) {
-                console.log(`Auto-upload triggered: ${unsentCount} nieuwe registraties`);
-                await sendDataReliable();
-            }
-        }
-
-        // Trigger upload when new planning is loaded
-        async function uploadOnPlanningChange() {
-            if (isUploading) return;
+            if (!hasDataFromToday) return false;
             
-            if (!account) {
-                console.log('Planning upload skipped: not logged in');
-                return;
-            }
+            // Check last upload time
+            const lastUpload = localStorage.getItem('last_successful_upload');
+            if (!lastUpload) return true;
             
-            if (hasUnsentRegistrations()) {
-                console.log('Planning upload triggered: nieuwe planning geladen');
-                await sendDataReliable();
-            }
+            const lastUploadTime = new Date(lastUpload);
+            const now = new Date();
+            const hoursSinceUpload = (now - lastUploadTime) / (1000 * 60 * 60);
+            
+            // If more than 4 hours since last upload and we have today's data, consider unsent
+            return hoursSinceUpload > 4;
         }
 
         async function checkAndAutoUpload() {
