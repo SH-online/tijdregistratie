@@ -2615,49 +2615,70 @@
         }
 
         function downloadCSV() {
-            if (!registrations || registrations.length === 0) {
-                showStatus('Geen data om te downloaden', 'error');
-                return;
+    if (!registrations || registrations.length === 0) {
+        showStatus('Geen data om te downloaden', 'error');
+        return;
+    }
+    
+    // Filter voor niet-verstuurde registraties (alleen van vandaag en gisteren)
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    const todayString = today.getFullYear() + '-' + 
+        String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+        String(today.getDate()).padStart(2, '0');
+    const yesterdayString = yesterday.getFullYear() + '-' + 
+        String(yesterday.getMonth() + 1).padStart(2, '0') + '-' + 
+        String(yesterday.getDate()).padStart(2, '0');
+    
+    const unsentRegistrations = registrations.filter(reg => 
+        reg.date === todayString || reg.date === yesterdayString
+    );
+    
+    if (unsentRegistrations.length === 0) {
+        showStatus('Geen niet-verstuurde data om te downloaden', 'error');
+        return;
+    }
+    
+    let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
+    
+    unsentRegistrations.forEach(reg => {
+        if (reg.hours && typeof reg.hours === 'object') {
+            if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                    const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                    Object.entries(activities).forEach(([activity, hours]) => {
+                        csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+                    });
+                });
+            } else {
+                Object.entries(reg.hours).forEach(([activity, hours]) => {
+                    csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+                });
             }
-            
-            let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
-            
-            registrations.forEach(reg => {
-                if (reg.hours && typeof reg.hours === 'object') {
-                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                            const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                            Object.entries(activities).forEach(([activity, hours]) => {
-                                csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                            });
-                        });
-                    } else {
-                        Object.entries(reg.hours).forEach(([activity, hours]) => {
-                            csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                        });
-                    }
-                }
-            });
-            
-            if (csvContent === 'Werknemer;Afdeling;Datum;Activiteit;Uren\n') {
-                showStatus('Geen geldige data om te downloaden', 'error');
-                return;
-            }
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const now = new Date();
-            const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
-            link.setAttribute('href', url);
-            link.setAttribute('download', `tijdregistratie_${timestamp}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showStatus('CSV gedownload!', 'success');
         }
+    });
+    
+    if (csvContent === 'Werknemer;Afdeling;Datum;Activiteit;Uren\n') {
+        showStatus('Geen geldige data om te downloaden', 'error');
+        return;
+    }
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    const now = new Date();
+    const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
+    link.setAttribute('href', url);
+    link.setAttribute('download', `tijdregistratie_nieuw_${timestamp}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showStatus(`CSV gedownload met ${unsentRegistrations.length} niet-verstuurde registraties!`, 'success');
+}
 
         function loadData() {
             try {
