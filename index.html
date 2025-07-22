@@ -2548,7 +2548,7 @@ let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
 
 unsentRegistrations.forEach(reg => {
     if (reg.hours && typeof reg.hours === 'object') {
-        if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+        if (reg.workLineNames && !Array.isArray(reg.hours)) {
             Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
                 const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
                 Object.entries(activities).forEach(([activity, hours]) => {
