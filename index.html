@@ -2094,7 +2094,9 @@
         }
 
         function getTotalHoursForSelectedDate(employeeName) {
-            const selectedDateString = selectedDate.toISOString().split('T')[0];
+            const selectedDateString = selectedDate.getFullYear() + '-' + 
+    String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+    String(selectedDate.getDate()).padStart(2, '0');
             let totalHours = 0;
             
             registrations.forEach(reg => {
@@ -2370,7 +2372,9 @@
                 });
             });
             
-            const selectedDateString = selectedDate.toISOString().split('T')[0];
+            const selectedDateString = selectedDate.getFullYear() + '-' + 
+    String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+    String(selectedDate.getDate()).padStart(2, '0');
             const currentTime = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
             
             registrations = registrations.filter(reg => 
