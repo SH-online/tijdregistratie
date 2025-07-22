@@ -2547,23 +2547,21 @@ if (unsentRegistrations.length === 0) {
 let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
 
 unsentRegistrations.forEach(reg => {
-                    
-                    registrations.forEach(reg => {
-                        if (reg.hours && typeof reg.hours === 'object') {
-                            if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
-                                Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
-                                    const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                                    Object.entries(activities).forEach(([activity, hours]) => {
-                                        csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                                    });
-                                });
-                            } else {
-                                Object.entries(reg.hours).forEach(([activity, hours]) => {
-                                    csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
-                                });
-                            }
-                        }
-                    });
+    if (reg.hours && typeof reg.hours === 'object') {
+        if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+            Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                Object.entries(activities).forEach(([activity, hours]) => {
+                    csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+                });
+            });
+        } else {
+            Object.entries(reg.hours).forEach(([activity, hours]) => {
+                csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+            });
+        }
+    }
+});
 
                     // Create filename with timestamp
                     const now = new Date();
