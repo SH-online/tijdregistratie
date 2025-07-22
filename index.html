@@ -2522,8 +2522,31 @@
 
                     const accessToken = tokenResponse.accessToken;
 
-                    // Prepare CSV data
-                    let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
+                    // Filter voor registraties die nog niet ge-upload zijn
+const lastUpload = localStorage.getItem('last_successful_upload');
+let unsentRegistrations;
+
+if (lastUpload) {
+    const lastUploadTime = new Date(lastUpload);
+    unsentRegistrations = registrations.filter(reg => {
+        const regTime = new Date(reg.date + 'T' + (reg.time || '00:00') + ':00');
+        return regTime > lastUploadTime;
+    });
+} else {
+    // Als er nog nooit ge-upload is, alle registraties meenemen
+    unsentRegistrations = registrations;
+}
+
+if (unsentRegistrations.length === 0) {
+    showUploadIndicator('Geen nieuwe data om te uploaden', 'success');
+    isUploading = false;
+    return;
+}
+
+// Prepare CSV data
+let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
+
+unsentRegistrations.forEach(reg => {
                     
                     registrations.forEach(reg => {
                         if (reg.hours && typeof reg.hours === 'object') {
@@ -2620,21 +2643,20 @@
         return;
     }
     
-    // Filter voor niet-verstuurde registraties (alleen van vandaag en gisteren)
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
+    // Filter voor registraties die nog niet ge-upload zijn
+    const lastUpload = localStorage.getItem('last_successful_upload');
+    let unsentRegistrations;
     
-    const todayString = today.getFullYear() + '-' + 
-        String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-        String(today.getDate()).padStart(2, '0');
-    const yesterdayString = yesterday.getFullYear() + '-' + 
-        String(yesterday.getMonth() + 1).padStart(2, '0') + '-' + 
-        String(yesterday.getDate()).padStart(2, '0');
-    
-    const unsentRegistrations = registrations.filter(reg => 
-        reg.date === todayString || reg.date === yesterdayString
-    );
+    if (lastUpload) {
+        const lastUploadTime = new Date(lastUpload);
+        unsentRegistrations = registrations.filter(reg => {
+            const regTime = new Date(reg.date + 'T' + (reg.time || '00:00') + ':00');
+            return regTime > lastUploadTime;
+        });
+    } else {
+        // Als er nog nooit ge-upload is, alle registraties meenemen
+        unsentRegistrations = registrations;
+    }
     
     if (unsentRegistrations.length === 0) {
         showStatus('Geen niet-verstuurde data om te downloaden', 'error');
@@ -2671,7 +2693,7 @@
     const now = new Date();
     const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
     link.setAttribute('href', url);
-    link.setAttribute('download', `tijdregistratie_nieuw_${timestamp}.csv`);
+    link.setAttribute('download', `tijdregistratie_${timestamp}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -2679,7 +2701,6 @@
     
     showStatus(`CSV gedownload met ${unsentRegistrations.length} niet-verstuurde registraties!`, 'success');
 }
-
         function loadData() {
             try {
                 const savedData = localStorage.getItem('sousvide_registrations');
