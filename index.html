@@ -2408,7 +2408,7 @@
                     if (activity.startsWith('Overig: ')) {
                         const beschrijving = activity.substring(8).trim(); // Tekst na "Overig: "
                         if (beschrijving.length < 4) {
-                            showModalStatus('Bij Overig moet je een beschrijving invullen van minimaal 4 tekens', 'error');
+                            showModalStatus('Bij Overig moet je een beschrijving invullen', 'error');
                             return;
                         }
                     }
