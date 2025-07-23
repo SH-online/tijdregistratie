@@ -2696,26 +2696,7 @@ unsentRegistrations.forEach(reg => {
         showStatus('Geen data om te downloaden', 'error');
         return;
     }
-
-    function clearAllData() {
-    if (confirm('Weet je zeker dat je ALLE registraties wilt wissen? Dit kan niet ongedaan worden gemaakt!')) {
-        if (confirm('Echt zeker? Alle uren registraties worden permanent verwijderd!')) {
-            registrations = [];
-            registrationCounter = 0;
-            localStorage.removeItem('sousvide_registrations');
-            localStorage.removeItem('registration_counter');
-            localStorage.removeItem('last_successful_upload');
-            localStorage.removeItem('last_upload_filename');
-            
-            // Update de planning tabel als die geladen is
-            if (planningData.length > 0) {
-                displayPlanningTable();
-            }
-            
-            showStatus('✅ Alle data is gewist!', 'success');
-        }
-    }
-}
+    
             
     // Filter voor registraties die nog niet ge-upload zijn
     const lastUpload = localStorage.getItem('last_successful_upload');
@@ -2775,6 +2756,27 @@ unsentRegistrations.forEach(reg => {
     
     showStatus(`CSV gedownload met ${unsentRegistrations.length} niet-verstuurde registraties!`, 'success');
 }
+
+function clearAllData() {
+    if (confirm('Weet je zeker dat je ALLE registraties wilt wissen? Dit kan niet ongedaan worden gemaakt!')) {
+        if (confirm('Echt zeker? Alle uren registraties worden permanent verwijderd!')) {
+            registrations = [];
+            registrationCounter = 0;
+            localStorage.removeItem('sousvide_registrations');
+            localStorage.removeItem('registration_counter');
+            localStorage.removeItem('last_successful_upload');
+            localStorage.removeItem('last_upload_filename');
+            
+            // Update de planning tabel als die geladen is
+            if (planningData.length > 0) {
+                displayPlanningTable();
+            }
+            
+            showStatus('✅ Alle data is gewist!', 'success');
+        }
+    }
+}
+        
         function loadData() {
             try {
                 const savedData = localStorage.getItem('sousvide_registrations');
