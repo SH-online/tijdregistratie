@@ -1576,6 +1576,26 @@
             }, hideTime);
         }
 
+        function showModalStatus(message, type) {
+    // Verwijder bestaande modal status
+    const existingStatus = document.querySelector('.modal-status');
+    if (existingStatus) {
+        existingStatus.remove();
+    }
+    
+    // Maak nieuwe modal status
+    const modalContent = document.querySelector('.hours-modal-content');
+    const statusEl = document.createElement('div');
+    statusEl.className = `modal-status ${type}`;
+    statusEl.textContent = message;
+    modalContent.appendChild(statusEl);
+    
+    // Verwijder na 5 seconden
+    setTimeout(() => {
+        statusEl.remove();
+    }, 5000);
+}
+
         function toggleDataManagement() {
             const managementEl = document.getElementById('data-management');
             const btnEl = event.target;
@@ -2444,26 +2464,6 @@ for (let workLineKey in multiWorkLineData) {
     
     showStatus(`✅ Uren bijgewerkt voor ${employeeName} op ${dateText} (${totalHours.toFixed(2)}u totaal)!`, 'success');
 
-            function showModalStatus(message, type) {
-    // Verwijder bestaande modal status
-    const existingStatus = document.querySelector('.modal-status');
-    if (existingStatus) {
-        existingStatus.remove();
-    }
-    
-    // Maak nieuwe modal status
-    const modalContent = document.querySelector('.hours-modal-content');
-    const statusEl = document.createElement('div');
-    statusEl.className = `modal-status ${type}`;
-    statusEl.textContent = message;
-    modalContent.appendChild(statusEl);
-    
-    // Verwijder na 5 seconden
-    setTimeout(() => {
-        statusEl.remove();
-    }, 5000);
-}
-    
     // Check if we need to auto-upload after 10 registrations
     if (registrationCounter >= UPLOAD_TRIGGER_COUNT && account) {
         showUploadIndicator(`Auto-upload na ${UPLOAD_TRIGGER_COUNT} registraties...`, 'uploading');
