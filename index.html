@@ -1363,10 +1363,10 @@
                 <button class="btn-uniform btn-yellow" onclick="toggleDataManagement()">Beheer opties</button>
             </div>
             
-            <div class="hidden" id="data-management">
-                <div class="controls" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                    <button id="send-data-btn" class="btn-uniform" onclick="sendData()">Gegevens versturen</button>
-                    <button class="btn-uniform" onclick="downloadCSV()">Download alle CSV</button>
+            <div class="controls" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+    <button id="send-data-btn" class="btn-uniform" onclick="sendData()">Gegevens versturen</button>
+    <button class="btn-uniform" onclick="downloadCSV()">Download alle CSV</button>
+    <button class="btn-uniform" style="background: #dc3545;" onclick="clearAllData()">Wis alle data</button>
                 </div>
             </div>
         </div>
@@ -2696,7 +2696,27 @@ unsentRegistrations.forEach(reg => {
         showStatus('Geen data om te downloaden', 'error');
         return;
     }
-    
+
+    function clearAllData() {
+    if (confirm('Weet je zeker dat je ALLE registraties wilt wissen? Dit kan niet ongedaan worden gemaakt!')) {
+        if (confirm('Echt zeker? Alle uren registraties worden permanent verwijderd!')) {
+            registrations = [];
+            registrationCounter = 0;
+            localStorage.removeItem('sousvide_registrations');
+            localStorage.removeItem('registration_counter');
+            localStorage.removeItem('last_successful_upload');
+            localStorage.removeItem('last_upload_filename');
+            
+            // Update de planning tabel als die geladen is
+            if (planningData.length > 0) {
+                displayPlanningTable();
+            }
+            
+            showStatus('✅ Alle data is gewist!', 'success');
+        }
+    }
+}
+            
     // Filter voor registraties die nog niet ge-upload zijn
     const lastUpload = localStorage.getItem('last_successful_upload');
     let unsentRegistrations;
