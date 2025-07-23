@@ -1327,7 +1327,7 @@
                     
                     <div class="controls">
                         <button class="btn btn-secondary" onclick="closeHoursModal()">Annuleren</button>
-                        <button class="btn btn-primary" onclick="saveRegistrationFromModal()">Opslaan</button>
+                        <button class="btn btn-primary" onclick="">Opslaan</button>
                     </div>
                 </div>
             </div>
@@ -2361,6 +2361,21 @@
                 showStatus('Voer minimaal één activiteit in', 'error');
                 return;
             }
+
+             if (Object.keys(multiWorkLineData).length === 0) {
+            showStatus('Voer minimaal één activiteit in', 'error');
+            return;
+            }
+
+        // Nieuwe controle voor Overig beschrijving
+        for (let workLineKey in multiWorkLineData) {
+            for (let activity in multiWorkLineData[workLineKey]) {
+            if (activity.startsWith('Overig:') && activity.length <= 7) { // "Overig: " = 7 tekens
+            showStatus('Overig activiteit moet een beschrijving hebben van minimaal 5 tekens', 'error');
+            return;
+                }
+            }
+            }             
             
             let totalHours = 0;
             const workLineNames = [];
