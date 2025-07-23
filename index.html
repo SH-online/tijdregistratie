@@ -1202,17 +1202,19 @@
         }
     
         .modal-status {
-    position: absolute;
-    top: 80px;
+    position: fixed;
+    bottom: 120px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 2000;
     min-width: 300px;
+    max-width: 90%;
     text-align: center;
     padding: 15px 20px;
     border-radius: 8px;
     font-weight: 600;
     font-size: 1.1em;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
 .modal-status.error {
