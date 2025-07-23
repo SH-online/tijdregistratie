@@ -1359,18 +1359,18 @@
         <div id="status-message"></div>
 
         <div class="section">
-            <div class="controls" style="display: flex; justify-content: center;">
-                <button class="btn-uniform btn-yellow" onclick="toggleDataManagement()">Beheer opties</button>
-            </div>
-            
-            <div class="controls" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-    <button id="send-data-btn" class="btn-uniform" onclick="sendData()">Gegevens versturen</button>
-    <button class="btn-uniform" onclick="downloadCSV()">Download alle CSV</button>
-    <button class="btn-uniform" style="background: #dc3545;" onclick="clearAllData()">Wis alle data</button>
-                </div>
-            </div>
+    <div class="controls" style="display: flex; justify-content: center;">
+        <button class="btn-uniform btn-yellow" onclick="toggleDataManagement()">Beheer opties</button>
+    </div>
+    
+    <div class="hidden" id="data-management">
+        <div class="controls" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <button id="send-data-btn" class="btn-uniform" onclick="sendData()">Gegevens versturen</button>
+            <button class="btn-uniform" onclick="downloadCSV()">Download alle CSV</button>
+            <button class="btn-uniform" style="background: #dc3545;" onclick="clearAllData()">Wis alle data</button>
         </div>
     </div>
+</div>
 
     <script src="https://alcdn.msauth.net/browser/2.32.2/js/msal-browser.min.js"></script>
     <script>
