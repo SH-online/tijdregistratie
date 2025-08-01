@@ -2445,15 +2445,6 @@
             }, 2000);
         }
 
-            // Trigger auto-upload after a few changes
-            setTimeout(async () => {
-                if (account && hasUnsavedChanges) {
-                    showUploadIndicator('Auto-upload wordt voorbereid...', 'uploading');
-                    await sendDataReliable();
-                }
-            }, 2000);
-        }
-
         function deleteRegistrationFromModal() {
             // Deze functie is verwijderd - niet meer nodig
         }
