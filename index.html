@@ -2436,6 +2436,24 @@
                 showStatus(`✅ Registratie gewist voor ${employeeName} op ${dateText}`, 'success');
             }
 
+            // Trigger auto-upload after a few changes
+            setTimeout(async () => {
+                if (account && hasUnsavedChanges) {
+                    showUploadIndicator('Auto-upload wordt voorbereid...', 'uploading');
+                    await sendDataReliable();
+                }
+            }, 2000);
+        }
+
+            // Trigger auto-upload after a few changes
+            setTimeout(async () => {
+                if (account && hasUnsavedChanges) {
+                    showUploadIndicator('Auto-upload wordt voorbereid...', 'uploading');
+                    await sendDataReliable();
+                }
+            }, 2000);
+        }
+
         function deleteRegistrationFromModal() {
             // Deze functie is verwijderd - niet meer nodig
         }
@@ -2627,55 +2645,45 @@
         }
 
         function downloadCSV() {
-    if (!weeklyTimeData || Object.keys(weeklyTimeData).length === 0) {
-        showStatus('Geen data om te downloaden', 'error');
-        return;
-    }
-
-    if (typeof workLines === 'undefined') {
-        showStatus('Interne fout: Afdeling-data (workLines) ontbreekt', 'error');
-        return;
-    }
-
-    let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
-
-    Object.entries(weeklyTimeData).forEach(([employeeName, dates]) => {
-        Object.entries(dates).forEach(([date, workLineDataPerDay]) => {
-            Object.entries(workLineDataPerDay).forEach(([workLineKey, activities]) => {
-                const workLineName =
-                    workLines[workLineKey] && workLines[workLineKey].name
-                        ? workLines[workLineKey].name
-                        : `ONBEKEND (${workLineKey})`;
-
-                Object.entries(activities).forEach(([activity, hours]) => {
-                    csvContent += `${employeeName};${workLineName};${date};${activity};${hours.toString().replace('.', ',')}\n`;
-                });
-            });
-        });
-    });
-
-    if (csvContent === 'Werknemer;Afdeling;Datum;Activiteit;Uren\n') {
-        showStatus('Geen geldige data om te downloaden', 'error');
-        return;
-    }
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-
-    const baseFileName = planningFileName || 'planning';
-    const filename = `Ingevulde uren ${baseFileName}.csv`;
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showStatus(`CSV gedownload als ${filename}!`, 'success');
-}
-
+            if (!weeklyTimeData || Object.keys(weeklyTimeData).length === 0) {
+                showStatus('Geen data om te downloaden', 'error');
+                return;
+            }
+            
+            let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
+            
+                    Object.entries(weeklyTimeData).forEach(([employeeName, dates]) => {
+                        Object.entries(dates).forEach(([date, workLines]) => {
+                            Object.entries(workLines).forEach(([workLineKey, activities]) => {
+                                const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                                Object.entries(activities).forEach(([activity, hours]) => {
+                                    csvContent += `${employeeName};${workLineName};${date};${activity};${hours.toString().replace('.', ',')}\n`;
+                                });
+                            });
+                        });
+                    });
+            
+            if (csvContent === 'Werknemer;Afdeling;Datum;Activiteit;Uren\n') {
+                showStatus('Geen geldige data om te downloaden', 'error');
+                return;
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const baseFileName = planningFileName || 'planning';
+            const filename = `Ingevulde uren ${baseFileName}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showStatus(`CSV gedownload als ${filename}!`, 'success');
+        }
 
         function clearAllData() {
             if (confirm('Weet je zeker dat je ALLE registraties wilt wissen? Dit kan niet ongedaan worden gemaakt!')) {
