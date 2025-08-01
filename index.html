@@ -425,16 +425,16 @@
         }
 
         .planning-table th.werkelijk-header.status-empty {
-            background: #dc3545 !important;
+            background: #dc3545 !important; /* Rood - nog niets ingevuld */
         }
 
         .planning-table th.werkelijk-header.status-partial {
-            background: #ffc107 !important;
+            background: #ffc107 !important; /* Geel - alles ingevuld maar afwijkingen */
             color: #212529 !important;
         }
 
         .planning-table th.werkelijk-header.status-complete {
-            background: #28a745 !important;
+            background: #28a745 !important; /* Groen - alles correct */
         }
 
         .planning-table td.werkelijk-cell {
@@ -923,25 +923,6 @@
             transform: translateY(-1px);
         }
 
-        .btn-delete {
-            background: #dc3545;
-            color: white;
-            padding: 10px 18px;
-            font-size: 1em;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-right: 8px;
-            min-height: 44px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .btn-delete:hover {
-            background: #c82333;
-            transform: translateY(-1px);
-        }
-
         .btn-fullday {
             background: #FF9800;
             color: white;
@@ -1103,6 +1084,7 @@
             box-shadow: 0 0 0 3px rgba(0,99,172,0.1);
         }
 
+        /* Auto-upload indicator */
         .upload-indicator {
             position: fixed;
             top: 20px;
@@ -1127,49 +1109,6 @@
         .upload-indicator.error {
             background: #dc3545;
             color: white;
-        }
-
-        .modal-status {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2000;
-            min-width: 300px;
-            max-width: 90%;
-            text-align: center;
-            padding: 15px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1.1em;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        .modal-status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 2px solid #f5c6cb;
-        }
-
-        .week-info {
-            background: #e8f4fd;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 2px solid #0063ac;
-            text-align: center;
-        }
-
-        .week-info h4 {
-            color: #0063ac;
-            margin: 0 0 5px 0;
-            font-size: 1.2em;
-        }
-
-        .week-info p {
-            color: #495057;
-            margin: 0;
-            font-size: 1em;
         }
 
         @media (max-width: 1100px) {
@@ -1287,6 +1226,7 @@
             </div>
         </div>
 
+        <!-- Upload indicator -->
         <div id="upload-indicator" class="upload-indicator">
             <span id="upload-indicator-text">Auto-upload actief</span>
         </div>
@@ -1387,7 +1327,7 @@
                     
                     <div class="controls">
                         <button class="btn btn-secondary" onclick="closeHoursModal()">Annuleren</button>
-                        <button class="btn btn-primary" onclick="saveRegistrationFromModal()">Opslaan</button>
+                        <button class="btn btn-primary" onclick="">Opslaan</button>
                     </div>
                 </div>
             </div>
@@ -1403,8 +1343,7 @@
             <div class="hidden" id="data-management">
                 <div class="controls" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
                     <button id="send-data-btn" class="btn-uniform" onclick="sendData()">Gegevens versturen</button>
-                    <button class="btn-uniform" onclick="downloadCSV()">Download CSV</button>
-                    <button class="btn-uniform" style="background: #dc3545;" onclick="clearAllData()">Wis alle data</button>
+                    <button class="btn-uniform" onclick="downloadCSV()">Download alle CSV</button>
                 </div>
             </div>
         </div>
@@ -1414,11 +1353,6 @@
     <script>
         let selectedDate = null;
         let currentWeekStart = null;
-        let planningFileName = '';
-        let currentWeekNumber = null;
-
-        // Nieuwe wekelijkse CSV data structuur
-        let weeklyTimeData = {}; // Structuur: weeklyTimeData[employeeName][date][workLine][activity] = hours
 
         function initializeDates() {
             const today = new Date();
@@ -1431,8 +1365,6 @@
             
             selectedDate = new Date(today);
             selectedDate.setHours(0, 0, 0, 0);
-            
-            currentWeekNumber = getWeekNumber(currentWeekStart);
         }
 
         function updateModalWeekDisplay() {
@@ -1512,6 +1444,7 @@
         }
 
         function updateModalSelectedDateDisplay() {
+            // Update modal title only
             if (currentEmployee) {
                 document.getElementById('hours-modal-title').textContent = 
                     `Urenregistratie voor ${currentEmployee} - ${selectedDate.toLocaleDateString('nl-NL')}`;
@@ -1575,7 +1508,16 @@
             }
         };
         
-        let employees = [];
+        let employees = [
+            'Agnieszka', 'Aniel', 'Arkadiusz', 'Biniam', 'Biyik', 'Boa', 'Fred', 'Herman', 
+            'Kamila', 'Klaas', 'Magda', 'Mustafa', 'Okan', 'Paul', 'Paula', 'Rakesh', 
+            'Randhir', 'Rein', 'Roy', 'Samantha', 'Sen', 'Stefan', 'Willem-Jan', 'Wubbe',
+            'BDE Agniezka Ircha', 'BDE Amber', 'BDE Ewelina', 'BDE Jessica', 'BDE Krzystof',
+            'BDE Monika', 'BDE Patryk', 'BDE Paulina', 'BDE Saraela', 'BDE Uliana',
+            'BDE Yaroslav', 'BDE Mahmut', 'BDE Przemyslaw', 'BDE Ewa', 'BDE Man'
+        ];
+        
+        let registrations = [];
         let currentEmployee = null;
         let currentWorkLine = null;
         let multiWorkLineData = {};
@@ -1583,8 +1525,9 @@
         let allPlanningData = [];
         let planningHeader = [];
 
-        // Auto-upload tracking variables
-        let hasUnsavedChanges = false;
+        // Enhanced upload tracking variables
+        let registrationCounter = 0; // Track number of registrations since last upload
+        const UPLOAD_TRIGGER_COUNT = 10; // Upload after every 10 registrations
 
         function showStatus(message, type) {
             const statusEl = document.getElementById('status-message');
@@ -1605,27 +1548,11 @@
             text.textContent = message;
             indicator.style.display = 'block';
             
+            // Auto-hide after 3 seconds for success, 5 seconds for others
             const hideTime = type === 'success' ? 3000 : 5000;
             setTimeout(() => {
                 indicator.style.display = 'none';
             }, hideTime);
-        }
-
-        function showModalStatus(message, type) {
-            const existingStatus = document.querySelector('.modal-status');
-            if (existingStatus) {
-                existingStatus.remove();
-            }
-            
-            const modalContent = document.querySelector('.hours-modal-content');
-            const statusEl = document.createElement('div');
-            statusEl.className = `modal-status ${type}`;
-            statusEl.textContent = message;
-            modalContent.appendChild(statusEl);
-            
-            setTimeout(() => {
-                statusEl.remove();
-            }, 5000);
         }
 
         function toggleDataManagement() {
@@ -1658,14 +1585,11 @@
             const file = event.target.files[0];
             if (!file) return;
             
-            // Store planning filename (without .csv extension)
-            planningFileName = file.name.replace(/\.csv$/i, '');
+            // Display filename without .csv extension
+            const fileName = file.name.replace(/\.csv$/i, '');
             const fileNameDisplay = document.getElementById('file-name-display');
-            fileNameDisplay.textContent = planningFileName;
+            fileNameDisplay.textContent = fileName;
             fileNameDisplay.style.display = 'inline-block';
-            
-            // Update week info
-            updatePlanningWeekInfo();
             
             showStatus('CSV bestand laden...', 'success');
             
@@ -1681,27 +1605,14 @@
                 
                 // Trigger auto-upload after planning is loaded
                 setTimeout(async () => {
-                    if (account && hasUnsavedChanges) {
+                    if (account && registrations && registrations.length > 0) {
                         showUploadIndicator('Auto-upload na planning laden...', 'uploading');
                         await sendDataReliable();
                     }
-                }, 2000);
+                }, 2000); // Wait 2 seconds to let the planning load complete
             };
             
             reader.readAsText(file, 'UTF-8');
-        }
-
-        function updatePlanningWeekInfo() {
-            const weekInfoEl = document.getElementById('current-planning-week');
-            const filenameEl = document.getElementById('planning-filename');
-            
-            if (weekInfoEl) {
-                weekInfoEl.textContent = `Week ${currentWeekNumber} - ${currentWeekStart.getFullYear()}`;
-            }
-            
-            if (filenameEl) {
-                filenameEl.textContent = planningFileName || 'Geen planning geladen';
-            }
         }
 
         function parsePlanningCSV(csvText) {
@@ -1791,6 +1702,7 @@
                 planningData = [...allPlanningData];
                 
                 updatePloegFilter();
+                
                 displayPlanningTable();
                 showStatus(`Planning geladen: ${allPlanningData.length} medewerkers (${skipCount} regels overgeslagen)`, 'success');
                 
@@ -1897,6 +1809,7 @@
             tableHead.innerHTML = '';
             const headerRow = document.createElement('tr');
             
+            // Track column status for header coloring
             const columnStatus = {};
             
             planningHeader.forEach((col, index) => {
@@ -1911,6 +1824,7 @@
                     thWerkelijk.textContent = col.replace('plan', 'uren');
                     thWerkelijk.className = 'werkelijk-header';
                     
+                    // We'll set the status class after analyzing all data
                     columnStatus[col] = { 
                         element: thWerkelijk, 
                         hasData: false, 
@@ -1946,6 +1860,18 @@
                         cell.className = 'clickable-name-cell';
                         
                         cell.onclick = () => startUrenRegistratie(employeeName);
+                        
+                        cell.onmouseover = () => {
+                            cell.style.backgroundColor = '#007bff';
+                            cell.style.color = 'white';
+                            cell.style.transform = 'scale(1.02)';
+                        };
+                        cell.onmouseout = () => {
+                            cell.style.backgroundColor = 'transparent';
+                            cell.style.color = '#0063ac';
+                            cell.style.transform = 'scale(1)';
+                        };
+                        
                         cell.title = `Klik om uren in te voeren voor ${employeeName}`;
                     }
                     
@@ -1964,8 +1890,10 @@
                         
                         const werkelijkeUren = getWerkelijkeUren(emp.Naam || emp.naam, dag);
                         
+                        // Better parsing of planned hours - handle both comma and dot decimals
                         let geplandeUrenString = emp[col] || '0';
                         if (typeof geplandeUrenString === 'string') {
+                            // Replace comma with dot for decimal parsing
                             geplandeUrenString = geplandeUrenString.replace(',', '.');
                         }
                         const geplandeUren = parseFloat(geplandeUrenString) || 0;
@@ -1973,13 +1901,14 @@
                         werkelijkCell.textContent = werkelijkeUren > 0 ? werkelijkeUren.toFixed(2) : '-';
                         
                         if (werkelijkeUren > 0) {
+                            // Round both values to 2 decimal places for accurate comparison
                             const werkelijkRounded = Math.round(werkelijkeUren * 100) / 100;
                             const geplandRounded = Math.round(geplandeUren * 100) / 100;
                             const afwijking = Math.abs(werkelijkRounded - geplandRounded);
                             
                             columnStatus[col].hasData = true;
                             
-                            if (afwijking < 0.01) {
+                            if (afwijking < 0.01) { // Practically zero (accounting for floating point)
                                 werkelijkCell.className = 'werkelijk-cell exact';
                             } else if (afwijking <= 1.0) {
                                 werkelijkCell.className = 'werkelijk-cell close';
@@ -1989,6 +1918,7 @@
                                 columnStatus[col].hasIssues = true;
                             }
                         } else {
+                            // Check if this is today and there are planned hours
                             const today = new Date();
                             const dagNummers = {
                                 'maandag': 1, 'dinsdag': 2, 'woensdag': 3, 'donderdag': 4, 'vrijdag': 5
@@ -2001,7 +1931,7 @@
                                 columnStatus[col].hasPending = true;
                             } else if (geplandeUren > 0) {
                                 werkelijkCell.className = 'werkelijk-cell empty';
-                                columnStatus[col].hasIssues = true;
+                                columnStatus[col].hasIssues = true; // Missing data counts as issue
                             } else {
                                 werkelijkCell.className = 'werkelijk-cell empty';
                             }
@@ -2013,12 +1943,16 @@
                 tableBody.appendChild(row);
             });
             
+            // Apply status classes to column headers
             Object.entries(columnStatus).forEach(([col, status]) => {
                 if (status.hasPending || !status.hasData) {
+                    // Red: nothing filled in or pending items
                     status.element.classList.add('status-empty');
                 } else if (status.hasIssues) {
+                    // Yellow: everything filled but has issues
                     status.element.classList.add('status-partial');
                 } else {
+                    // Green: everything correct
                     status.element.classList.add('status-complete');
                 }
             });
@@ -2030,7 +1964,7 @@
         }
 
         function getWerkelijkeUren(employeeName, dag) {
-            if (!weeklyTimeData[employeeName] || !dag) return 0;
+            if (!registrations || !employeeName || !dag) return 0;
             
             const dagNummers = {
                 'maandag': 0,
@@ -2043,18 +1977,28 @@
             const targetDate = new Date(currentWeekStart);
             targetDate.setDate(currentWeekStart.getDate() + dagNummers[dag]);
             const targetDateString = targetDate.getFullYear() + '-' + 
-                String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                String(targetDate.getDate()).padStart(2, '0');
+    String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + 
+    String(targetDate.getDate()).padStart(2, '0');
             
             let totalHours = 0;
             
-            if (weeklyTimeData[employeeName][targetDateString]) {
-                Object.values(weeklyTimeData[employeeName][targetDateString]).forEach(workLine => {
-                    Object.values(workLine).forEach(hours => {
-                        totalHours += parseFloat(hours) || 0;
-                    });
-                });
-            }
+            registrations.forEach(reg => {
+                if (reg.employee === employeeName && reg.date === targetDateString) {
+                    if (reg.hours && typeof reg.hours === 'object') {
+                        if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                            Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                                Object.values(activities).forEach(hours => {
+                                    totalHours += parseFloat(hours) || 0;
+                                });
+                            });
+                        } else {
+                            Object.values(reg.hours).forEach(hours => {
+                                totalHours += parseFloat(hours) || 0;
+                            });
+                        }
+                    }
+                }
+            });
             
             return totalHours;
         }
@@ -2064,25 +2008,23 @@
             currentWorkLine = null;
             multiWorkLineData = {};
             
+            // Reset selected date to today when starting new registration
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             selectedDate = new Date(today);
-            
-            // Initialize employee data if not exists
-            if (!weeklyTimeData[employeeName]) {
-                weeklyTimeData[employeeName] = {};
-            }
             
             loadExistingRegistrationsForSelectedDate(employeeName);
             
             document.getElementById('hours-modal-title').textContent = 
                 `Urenregistratie voor ${employeeName}`;
             
+            // Show date selection first
             document.getElementById('modal-date-selection').classList.remove('hidden');
             document.getElementById('modal-workline-selection').classList.add('hidden');
             document.getElementById('modal-hours-registration').classList.add('hidden');
             document.getElementById('modal-total-overview').classList.add('hidden');
             
+            // Initialize modal date displays
             updateModalWeekDisplay();
             updateModalDayButtons();
             updateModalSelectedDateDisplay();
@@ -2098,6 +2040,7 @@
                 showStatus(`Nieuwe urenregistratie voor ${employeeName} op ${selectedDate.toLocaleDateString('nl-NL')}`, 'success');
             }
             
+            // Automatically show workline selection after a short delay
             setTimeout(() => {
                 document.getElementById('modal-workline-selection').classList.remove('hidden');
             }, 500);
@@ -2105,32 +2048,74 @@
 
         function loadExistingRegistrationsForSelectedDate(employeeName) {
             const selectedDateString = selectedDate.getFullYear() + '-' + 
-                String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                String(selectedDate.getDate()).padStart(2, '0');
+    String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+    String(selectedDate.getDate()).padStart(2, '0');
+            
+            const selectedDateRegistrations = registrations.filter(reg => 
+                reg.employee === employeeName && reg.date === selectedDateString
+            );
             
             multiWorkLineData = {};
             
-            if (weeklyTimeData[employeeName] && weeklyTimeData[employeeName][selectedDateString]) {
-                Object.entries(weeklyTimeData[employeeName][selectedDateString]).forEach(([workLineKey, activities]) => {
-                    multiWorkLineData[workLineKey] = { ...activities };
-                });
-            }
+            selectedDateRegistrations.forEach(reg => {
+                if (reg.hours && typeof reg.hours === 'object') {
+                    if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                        Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                            if (!multiWorkLineData[workLineKey]) {
+                                multiWorkLineData[workLineKey] = {};
+                            }
+                            
+                            Object.entries(activities).forEach(([activity, hours]) => {
+                                if (multiWorkLineData[workLineKey][activity]) {
+                                    multiWorkLineData[workLineKey][activity] += parseFloat(hours);
+                                } else {
+                                    multiWorkLineData[workLineKey][activity] = parseFloat(hours);
+                                }
+                            });
+                        });
+                    } else if (reg.workLineName) {
+                        const workLineKey = Object.keys(workLines).find(key => workLines[key].name === reg.workLineName);
+                        if (workLineKey) {
+                            if (!multiWorkLineData[workLineKey]) {
+                                multiWorkLineData[workLineKey] = {};
+                            }
+                            
+                            Object.entries(reg.hours).forEach(([activity, hours]) => {
+                                if (multiWorkLineData[workLineKey][activity]) {
+                                    multiWorkLineData[workLineKey][activity] += parseFloat(hours);
+                                } else {
+                                    multiWorkLineData[workLineKey][activity] = parseFloat(hours);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
         }
 
         function getTotalHoursForSelectedDate(employeeName) {
             const selectedDateString = selectedDate.getFullYear() + '-' + 
-                String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                String(selectedDate.getDate()).padStart(2, '0');
-            
+    String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+    String(selectedDate.getDate()).padStart(2, '0');
             let totalHours = 0;
             
-            if (weeklyTimeData[employeeName] && weeklyTimeData[employeeName][selectedDateString]) {
-                Object.values(weeklyTimeData[employeeName][selectedDateString]).forEach(workLine => {
-                    Object.values(workLine).forEach(hours => {
-                        totalHours += parseFloat(hours) || 0;
-                    });
-                });
-            }
+            registrations.forEach(reg => {
+                if (reg.employee === employeeName && reg.date === selectedDateString) {
+                    if (reg.hours && typeof reg.hours === 'object') {
+                        if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                            Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                                Object.values(activities).forEach(hours => {
+                                    totalHours += parseFloat(hours) || 0;
+                                });
+                            });
+                        } else {
+                            Object.values(reg.hours).forEach(hours => {
+                                totalHours += parseFloat(hours) || 0;
+                            });
+                        }
+                    }
+                }
+            });
             
             return totalHours;
         }
@@ -2314,14 +2299,16 @@
         function setFullDayInModal(inputId) {
             clearAllHoursInModal();
             
-            const dayOfWeek = selectedDate.getDay();
+            // Determine hours based on day of week
+            const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 5 = Friday
             let hours;
             
-            if (dayOfWeek === 5) {
+            if (dayOfWeek === 5) { // Friday
                 hours = '8';
-            } else if (dayOfWeek >= 1 && dayOfWeek <= 4) {
+            } else if (dayOfWeek >= 1 && dayOfWeek <= 4) { // Monday to Thursday
                 hours = '7.5';
             } else {
+                // Weekend (shouldn't happen in this app, but default to 7.5)
                 hours = '7.5';
             }
             
@@ -2363,107 +2350,117 @@
         }
 
         function saveRegistrationFromModal() {
-            if (!currentEmployee) {
-                showStatus('Geen werknemer geselecteerd', 'error');
-                return;
-            }
-            
-            saveCurrentWorkLineDataInModal();
-            
-            // Check for Overig description
-            const overigInput = document.getElementById('modal-overig-hours');
-            const overigDescription = document.getElementById('modal-overig-hours-description');
+    if (!currentEmployee) {
+        showStatus('Geen werknemer geselecteerd', 'error');
+        return;
+    }
+    
+    saveCurrentWorkLineDataInModal();
+    
+    if (Object.keys(multiWorkLineData).length === 0) {
+        showStatus('Voer minimaal één activiteit in', 'error');
+        return;
+    }
 
-            if (overigInput && parseFloat(overigInput.value) > 0) {
-                if (!overigDescription || overigDescription.value.trim().length < 4) {
-                    showModalStatus('Bij Overig moet je een beschrijving invullen', 'error');
-                    return;
-                }
-            }
-
-            const selectedDateString = selectedDate.getFullYear() + '-' + 
-                String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                String(selectedDate.getDate()).padStart(2, '0');
-            
-            // Initialize employee data if not exists
-            if (!weeklyTimeData[currentEmployee]) {
-                weeklyTimeData[currentEmployee] = {};
-            }
-            
-            // Save to weekly data structure - make sure we store the workline keys correctly
-            if (Object.keys(multiWorkLineData).length > 0) {
-                // Debug: log what we're saving
-                console.log('Saving multiWorkLineData:', multiWorkLineData);
-                console.log('Available workLines keys:', Object.keys(workLines));
-                
-                // Debug: log the exact structure being saved
-                console.log('Saving to weeklyTimeData[' + currentEmployee + '][' + selectedDateString + ']:', multiWorkLineData);
-                
-                weeklyTimeData[currentEmployee][selectedDateString] = { ...multiWorkLineData };
-                
-                // Debug: log what was actually saved
-                console.log('After saving, weeklyTimeData structure:', JSON.stringify(weeklyTimeData, null, 2));
-            } else {
-                // If no data, remove the date entry (effectively deleting the registration)
-                if (weeklyTimeData[currentEmployee][selectedDateString]) {
-                    delete weeklyTimeData[currentEmployee][selectedDateString];
-                }
-            }
-            
-            // Save to localStorage
-            localStorage.setItem('weekly_time_data', JSON.stringify(weeklyTimeData));
-            hasUnsavedChanges = true;
-            
-            let totalHours = 0;
-            Object.values(multiWorkLineData).forEach(workLine => {
-                Object.values(workLine).forEach(hours => {
-                    totalHours += hours;
-                });
-            });
-            
-            const employeeName = currentEmployee;
-            const dateText = selectedDate.toLocaleDateString('nl-NL');
-            
-            closeHoursModal();
-            
-            if (planningData.length > 0) {
-                displayPlanningTable();
-            }
-            
-            if (totalHours > 0) {
-                showStatus(`✅ Uren opgeslagen voor ${employeeName} op ${dateText} (${totalHours.toFixed(2)}u totaal)!`, 'success');
-            } else {
-                showStatus(`✅ Registratie gewist voor ${employeeName} op ${dateText}`, 'success');
-            }
-
-            // Trigger auto-upload after a few changes
-            setTimeout(async () => {
-                if (account && hasUnsavedChanges) {
-                    showUploadIndicator('Auto-upload wordt voorbereid...', 'uploading');
-                    await sendDataReliable();
-                }
-            }, 2000);
-        }
-
-        function deleteRegistrationFromModal() {
-            // Deze functie is verwijderd - niet meer nodig
-        }
-
-        // Auto-upload functionality
+    let totalHours = 0;
+    const workLineNames = [];
+    
+    Object.entries(multiWorkLineData).forEach(([workLineKey, activities]) => {
+        workLineNames.push(workLines[workLineKey].name);
+        Object.values(activities).forEach(hours => {
+            totalHours += hours;
+        });
+    });
+    
+    const selectedDateString = selectedDate.getFullYear() + '-' + 
+        String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+        String(selectedDate.getDate()).padStart(2, '0');
+    const currentTime = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    
+    registrations = registrations.filter(reg => 
+        !(reg.employee === currentEmployee && reg.date === selectedDateString)
+    );
+    
+    const registration = {
+        employee: currentEmployee,
+        workLineNames: workLineNames,
+        date: selectedDateString,
+        time: currentTime,
+        hours: multiWorkLineData,
+        total: totalHours
+    };
+    
+    registrations.unshift(registration);
+    localStorage.setItem('sousvide_registrations', JSON.stringify(registrations));
+    
+    // Increment registration counter for auto-upload tracking
+    registrationCounter++;
+    
+    const employeeName = currentEmployee;
+    const dateText = selectedDate.toLocaleDateString('nl-NL');
+    
+    closeHoursModal();
+    
+    if (planningData.length > 0) {
+        displayPlanningTable();
+    }
+    
+    showStatus(`✅ Uren bijgewerkt voor ${employeeName} op ${dateText} (${totalHours.toFixed(2)}u totaal)!`, 'success');
+    
+    // Check if we need to auto-upload after 10 registrations
+    if (registrationCounter >= UPLOAD_TRIGGER_COUNT && account) {
+        showUploadIndicator(`Auto-upload na ${UPLOAD_TRIGGER_COUNT} registraties...`, 'uploading');
+        setTimeout(async () => {
+            await sendDataReliable();
+            registrationCounter = 0; // Reset counter after successful upload
+        }, 1000);
+    } else if (registrationCounter >= UPLOAD_TRIGGER_COUNT && !account) {
+        showUploadIndicator('Log in om auto-upload te activeren', 'error');
+    }
+}
+        // Auto-upload functionality for reliability
+        let uploadQueue = [];
         let isUploading = false;
+        let lastUploadAttempt = null;
 
+        // Check for unsent data and auto-upload periodically
         function initializeAutoUpload() {
+            // Try to upload every 10 minutes
             setInterval(checkAndAutoUpload, 10 * 60 * 1000);
-            setTimeout(checkAndAutoUpload, 5000);
             
+            // Also check on page load
+            setTimeout(checkAndAutoUpload, 5000); // Wait 5 seconds after load
+            
+            // Upload before page unload
             window.addEventListener('beforeunload', function(e) {
-                if (hasUnsavedChanges) {
+                if (hasUnsentData()) {
                     sendDataReliable();
                     e.preventDefault();
                     e.returnValue = 'Er zijn nog niet-verstuurde gegevens. Weet je zeker dat je de pagina wilt verlaten?';
                     return e.returnValue;
                 }
             });
+        }
+
+        function hasUnsentData() {
+            if (!registrations || registrations.length === 0) return false;
+            
+            // Check if we have data from today that hasn't been uploaded recently
+            const today = new Date().toISOString().split('T')[0];
+            const hasDataFromToday = registrations.some(reg => reg.date === today);
+            
+            if (!hasDataFromToday) return false;
+            
+            // Check last upload time
+            const lastUpload = localStorage.getItem('last_successful_upload');
+            if (!lastUpload) return true;
+            
+            const lastUploadTime = new Date(lastUpload);
+            const now = new Date();
+            const hoursSinceUpload = (now - lastUploadTime) / (1000 * 60 * 60);
+            
+            // If more than 4 hours since last upload and we have today's data, consider unsent
+            return hoursSinceUpload > 4;
         }
 
         async function checkAndAutoUpload() {
@@ -2474,8 +2471,8 @@
                 return;
             }
             
-            if (hasUnsavedChanges) {
-                console.log('Auto-upload triggered: unsaved changes detected');
+            if (hasUnsentData()) {
+                console.log('Auto-upload triggered: unsent data detected');
                 showUploadIndicator('Periodieke auto-upload...', 'uploading');
                 await sendDataReliable();
             }
@@ -2487,7 +2484,7 @@
                 return;
             }
             
-            if (!weeklyTimeData || Object.keys(weeklyTimeData).length === 0) {
+            if (!registrations || registrations.length === 0) {
                 showStatus('Geen data om te versturen', 'error');
                 return;
             }
@@ -2500,12 +2497,13 @@
 
             isUploading = true;
             let attempt = 1;
-            const maxAttempts = 3;
+            const maxAttempts = 5;
             
             while (attempt <= maxAttempts) {
                 try {
                     showUploadIndicator(`Uploaden... (${attempt}/${maxAttempts})`, 'uploading');
 
+                    // Get access token with retry logic
                     let tokenResponse;
                     try {
                         const tokenRequest = {
@@ -2515,10 +2513,6 @@
                         tokenResponse = await msalInstance.acquireTokenSilent(tokenRequest);
                     } catch (tokenError) {
                         if (tokenError.message.includes('interaction_required')) {
-                            const tokenRequest = {
-                                scopes: ['Files.ReadWrite'],
-                                account: account
-                            };
                             tokenResponse = await msalInstance.acquireTokenPopup(tokenRequest);
                         } else {
                             throw tokenError;
@@ -2527,57 +2521,57 @@
 
                     const accessToken = tokenResponse.accessToken;
 
-                    // Create CSV content from weekly data
-                    let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
+                    // Filter voor registraties die nog niet ge-upload zijn
+const lastUpload = localStorage.getItem('last_successful_upload');
+let unsentRegistrations;
 
-                    Object.entries(weeklyTimeData).forEach(([employeeName, dates]) => {
-                        Object.entries(dates).forEach(([date, workLinesData]) => {
-                            Object.entries(workLinesData).forEach(([workLineKey, activities]) => {
-                                // Debug: log what we're processing
-                                console.log('Processing workLineKey:', workLineKey, 'for employee:', employeeName);
-                                console.log('Available workLines:', Object.keys(workLines));
-                                
-                                // Get the correct workline name with comprehensive fallback
-                                let workLineName = 'Onbekend';
-                                
-                                // First try: exact key match
-                                if (workLines[workLineKey] && workLines[workLineKey].name) {
-                                    workLineName = workLines[workLineKey].name;
-                                    console.log('Found by key:', workLineName);
-                                } 
-                                // Second try: find by name match
-                                else {
-                                    const foundWorkLine = Object.entries(workLines).find(([key, value]) => 
-                                        value.name.toLowerCase() === workLineKey.toLowerCase() || 
-                                        key.toLowerCase() === workLineKey.toLowerCase()
-                                    );
-                                    if (foundWorkLine) {
-                                        workLineName = foundWorkLine[1].name;
-                                        console.log('Found by name match:', workLineName);
-                                    }
-                                    // Final fallback: use the key itself if it looks like a workline name
-                                    else if (workLineKey && workLineKey !== 'undefined') {
-                                        workLineName = workLineKey;
-                                        console.log('Using key as name:', workLineName);
-                                    }
-                                }
-                                
-                                Object.entries(activities).forEach(([activity, hours]) => {
-                                    csvContent += `${employeeName};${workLineName};${date};${activity};${hours.toString().replace('.', ',')}\n`;
-                                });
-                            });
-                        });
-                    });
+if (lastUpload) {
+    const lastUploadTime = new Date(lastUpload);
+    unsentRegistrations = registrations.filter(reg => {
+        const regTime = new Date(reg.date + 'T' + (reg.time || '00:00') + ':00');
+        return regTime > lastUploadTime;
+    });
+} else {
+    // Als er nog nooit ge-upload is, alle registraties meenemen
+    unsentRegistrations = registrations;
+}
 
-                    // Create filename based on planning file
-                    const baseFileName = planningFileName || 'planning';
-                    const filename = `Ingevulde uren ${baseFileName}.csv`;
+if (unsentRegistrations.length === 0) {
+    showUploadIndicator('Geen nieuwe data om te uploaden', 'success');
+    isUploading = false;
+    return;
+}
+
+// Prepare CSV data
+let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
+
+unsentRegistrations.forEach(reg => {
+    if (reg.hours && typeof reg.hours === 'object') {
+        if (reg.workLineNames && !Array.isArray(reg.hours)) {
+            Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                Object.entries(activities).forEach(([activity, hours]) => {
+                    csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+                });
+            });
+        } else {
+            Object.entries(reg.hours).forEach(([activity, hours]) => {
+                csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+            });
+        }
+    }
+});
+
+                    // Create filename with timestamp
+                    const now = new Date();
+                    const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
+                    const filename = `tijdregistratie_${timestamp}.csv`;
 
                     // Upload to OneDrive with timeout
                     const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/Autouploads/${filename}:/content`;
                     
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 30000);
+                    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
                     
                     const uploadResponse = await fetch(uploadUrl, {
                         method: 'PUT',
@@ -2594,14 +2588,14 @@
                     if (uploadResponse.ok) {
                         const result = await uploadResponse.json();
                         
-                        hasUnsavedChanges = false;
+                        // Mark as successfully uploaded
                         localStorage.setItem('last_successful_upload', now.toISOString());
                         localStorage.setItem('last_upload_filename', filename);
                         
                         showUploadIndicator(`✅ Upload succesvol: ${filename}`, 'success');
                         showStatus(`✅ Gegevens succesvol verstuurd naar OneDrive/Autouploads als ${filename}`, 'success');
                         isUploading = false;
-                        return;
+                        return; // Success, exit retry loop
                         
                     } else {
                         throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
@@ -2611,16 +2605,20 @@
                     console.error(`Upload attempt ${attempt} failed:`, error);
                     
                     if (attempt === maxAttempts) {
+                        // Final attempt failed
                         showUploadIndicator('❌ Upload mislukt na meerdere pogingen', 'error');
                         showStatus(`❌ Upload mislukt na ${maxAttempts} pogingen. Probeer later opnieuw of controleer internetverbinding.`, 'error');
                         
+                        // Store failed attempt info
                         localStorage.setItem('last_failed_upload', new Date().toISOString());
+                        localStorage.setItem('failed_upload_data', JSON.stringify(registrations));
                         
                         isUploading = false;
                         return;
                     }
                     
-                    const waitTime = Math.min(1000 * Math.pow(2, attempt), 10000);
+                    // Wait before retry (exponential backoff)
+                    const waitTime = Math.min(1000 * Math.pow(2, attempt), 30000); // Max 30 seconds
                     showUploadIndicator(`Opnieuw proberen in ${Math.round(waitTime/1000)}s...`, 'uploading');
                     await new Promise(resolve => setTimeout(resolve, waitTime));
                     
@@ -2631,151 +2629,100 @@
             isUploading = false;
         }
 
+        // Replace the old sendData function
         async function sendData() {
             await sendDataReliable();
         }
 
         function downloadCSV() {
-            if (!weeklyTimeData || Object.keys(weeklyTimeData).length === 0) {
-                showStatus('Geen data om te downloaden', 'error');
-                return;
-            }
-            
-            let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
-            
-                    Object.entries(weeklyTimeData).forEach(([employeeName, dates]) => {
-                        Object.entries(dates).forEach(([date, workLines]) => {
-                            Object.entries(workLines).forEach(([workLineKey, activities]) => {
-                                const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
-                                Object.entries(activities).forEach(([activity, hours]) => {
-                                    csvContent += `${employeeName};${workLineName};${date};${activity};${hours.toString().replace('.', ',')}\n`;
-                                });
-                            });
-                        });
+    if (!registrations || registrations.length === 0) {
+        showStatus('Geen data om te downloaden', 'error');
+        return;
+    }
+    
+    // Filter voor registraties die nog niet ge-upload zijn
+    const lastUpload = localStorage.getItem('last_successful_upload');
+    let unsentRegistrations;
+    
+    if (lastUpload) {
+        const lastUploadTime = new Date(lastUpload);
+        unsentRegistrations = registrations.filter(reg => {
+            const regTime = new Date(reg.date + 'T' + (reg.time || '00:00') + ':00');
+            return regTime > lastUploadTime;
+        });
+    } else {
+        // Als er nog nooit ge-upload is, alle registraties meenemen
+        unsentRegistrations = registrations;
+    }
+    
+    if (unsentRegistrations.length === 0) {
+        showStatus('Geen niet-verstuurde data om te downloaden', 'error');
+        return;
+    }
+    
+    let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
+    
+    unsentRegistrations.forEach(reg => {
+        if (reg.hours && typeof reg.hours === 'object') {
+            if (reg.workLineNames && typeof reg.hours === 'object' && !Array.isArray(reg.hours)) {
+                Object.entries(reg.hours).forEach(([workLineKey, activities]) => {
+                    const workLineName = workLines[workLineKey] ? workLines[workLineKey].name : workLineKey;
+                    Object.entries(activities).forEach(([activity, hours]) => {
+                        csvContent += `${reg.employee || 'Onbekend'};${workLineName};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
                     });
-            
-            if (csvContent === 'Werknemer;Afdeling;Datum;Activiteit;Uren\n') {
-                showStatus('Geen geldige data om te downloaden', 'error');
-                return;
-            }
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            const baseFileName = planningFileName || 'planning';
-            const filename = `Ingevulde uren ${baseFileName}.csv`;
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showStatus(`CSV gedownload als ${filename}!`, 'success');
-        }
-
-        function clearAllData() {
-            if (confirm('Weet je zeker dat je ALLE registraties wilt wissen? Dit kan niet ongedaan worden gemaakt!')) {
-                if (confirm('Echt zeker? Alle uren registraties worden permanent verwijderd!')) {
-                    weeklyTimeData = {};
-                    hasUnsavedChanges = false;
-                    localStorage.removeItem('weekly_time_data');
-                    localStorage.removeItem('last_successful_upload');
-                    localStorage.removeItem('last_upload_filename');
-                    
-                    if (planningData.length > 0) {
-                        displayPlanningTable();
-                    }
-                    
-                    showStatus('✅ Alle data is gewist!', 'success');
-                }
+                });
+            } else {
+                Object.entries(reg.hours).forEach(([activity, hours]) => {
+                    csvContent += `${reg.employee || 'Onbekend'};${reg.workLineName || 'Onbekend'};${reg.date || 'Onbekend'};${activity};${hours.toString().replace('.', ',')}\n`;
+                });
             }
         }
-        
+    });
+    
+    if (csvContent === 'Werknemer;Afdeling;Datum;Activiteit;Uren\n') {
+        showStatus('Geen geldige data om te downloaden', 'error');
+        return;
+    }
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    const now = new Date();
+    const timestamp = `${now.toISOString().split('T')[0]}_${now.toTimeString().slice(0,5).replace(':', '')}`;
+    link.setAttribute('href', url);
+    link.setAttribute('download', `tijdregistratie_${timestamp}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showStatus(`CSV gedownload met ${unsentRegistrations.length} niet-verstuurde registraties!`, 'success');
+}
         function loadData() {
             try {
-                const savedData = localStorage.getItem('weekly_time_data');
+                const savedData = localStorage.getItem('sousvide_registrations');
                 if (savedData) {
-                    weeklyTimeData = JSON.parse(savedData);
-                    if (typeof weeklyTimeData !== 'object') {
-                        weeklyTimeData = {};
-                    }
-                    
-                    // Debug: log the loaded data structure
-                    console.log('Loaded weeklyTimeData:', weeklyTimeData);
-                    
-                    // Check if we have unsaved changes
-                    const lastUpload = localStorage.getItem('last_successful_upload');
-                    if (Object.keys(weeklyTimeData).length > 0) {
-                        if (!lastUpload) {
-                            hasUnsavedChanges = true;
-                        } else {
-                            const lastUploadTime = new Date(lastUpload);
-                            const now = new Date();
-                            const hoursSinceUpload = (now - lastUploadTime) / (1000 * 60 * 60);
-                            hasUnsavedChanges = hoursSinceUpload > 1; // Consider unsaved if more than 1 hour
-                        }
+                    registrations = JSON.parse(savedData);
+                    if (!Array.isArray(registrations)) {
+                        registrations = [];
                     }
                 }
-                
-                // Try to migrate old registration data if it exists
-                const oldRegistrations = localStorage.getItem('sousvide_registrations');
-                if (oldRegistrations && Object.keys(weeklyTimeData).length === 0) {
-                    console.log('Migrating old registration data...');
-                    migrateOldRegistrations(JSON.parse(oldRegistrations));
+
+                // Load registration counter
+                const savedCounter = localStorage.getItem('registration_counter');
+                if (savedCounter) {
+                    registrationCounter = parseInt(savedCounter, 10) || 0;
                 }
-                
             } catch (error) {
-                weeklyTimeData = {};
-                hasUnsavedChanges = false;
-                localStorage.removeItem('weekly_time_data');
+                registrations = [];
+                registrationCounter = 0;
+                localStorage.removeItem('sousvide_registrations');
+                localStorage.removeItem('registration_counter');
             }
         }
-        
-        function migrateOldRegistrations(oldRegistrations) {
-            // Convert old registration format to new weekly format
-            oldRegistrations.forEach(reg => {
-                if (!weeklyTimeData[reg.employee]) {
-                    weeklyTimeData[reg.employee] = {};
-                }
-                
-                if (!weeklyTimeData[reg.employee][reg.date]) {
-                    weeklyTimeData[reg.employee][reg.date] = {};
-                }
-                
-                // Try to determine workline from old data
-                let workLineKey = null;
-                if (reg.workLineName) {
-                    // Find the key by matching the name
-                    workLineKey = Object.keys(workLines).find(key => 
-                        workLines[key].name === reg.workLineName
-                    );
-                }
-                
-                if (!workLineKey && reg.workLineNames && reg.workLineNames.length > 0) {
-                    // Try to find from workLineNames array
-                    workLineKey = Object.keys(workLines).find(key => 
-                        workLines[key].name === reg.workLineNames[0]
-                    );
-                }
-                
-                // Fallback to a default workline
-                if (!workLineKey) {
-                    workLineKey = 'schillijn'; // Default fallback
-                }
-                
-                if (reg.hours && typeof reg.hours === 'object') {
-                    weeklyTimeData[reg.employee][reg.date][workLineKey] = reg.hours;
-                }
-            });
-            
-            // Save migrated data
-            localStorage.setItem('weekly_time_data', JSON.stringify(weeklyTimeData));
-            hasUnsavedChanges = true;
-            
-            console.log('Migration completed. New data structure:', weeklyTimeData);
+
+        function saveRegistrationCounter() {
+            localStorage.setItem('registration_counter', registrationCounter.toString());
         }
 
         async function signInToMicrosoft() {
@@ -2790,6 +2737,7 @@
                 const loginResponse = await msalInstance.loginPopup(loginRequest);
                 account = loginResponse.account;
                 
+                // Update UI
                 document.getElementById('sign-in-btn').style.display = 'none';
                 document.getElementById('sign-out-btn').style.display = 'block';
                 document.getElementById('user-info').textContent = account.name || account.username;
@@ -2798,10 +2746,13 @@
                 showStatus(`Welkom ${account.name || account.username}!`, 'success');
                 showUploadIndicator('Auto-upload geactiveerd', 'success');
                 
+                // Check for unsent data after login and upload if needed
                 setTimeout(async () => {
-                    if (hasUnsavedChanges) {
+                    if (hasUnsentData() || registrationCounter > 0) {
                         showUploadIndicator('Uploaden van bestaande gegevens...', 'uploading');
                         await sendDataReliable();
+                        registrationCounter = 0;
+                        saveRegistrationCounter();
                     }
                 }, 2000);
                 
@@ -2820,6 +2771,7 @@
                     });
                 }
                 
+                // Reset UI
                 document.getElementById('sign-in-btn').style.display = 'block';
                 document.getElementById('sign-out-btn').style.display = 'none';
                 document.getElementById('user-info').style.display = 'none';
@@ -2834,6 +2786,7 @@
             }
         }
 
+        // Check if user is already logged in on page load
         async function checkExistingLogin() {
             try {
                 if (!msalInstance) {
@@ -2845,16 +2798,13 @@
                 if (accounts.length > 0) {
                     account = accounts[0];
                     
+                    // Update UI for logged in state
                     document.getElementById('sign-in-btn').style.display = 'none';
                     document.getElementById('sign-out-btn').style.display = 'block';
                     document.getElementById('user-info').textContent = account.name || account.username;
                     document.getElementById('user-info').style.display = 'block';
                     
-                    if (hasUnsavedChanges) {
-                        showUploadIndicator('Auto-upload actief - niet-opgeslagen wijzigingen', 'uploading');
-                    } else {
-                        showUploadIndicator('Auto-upload actief', 'success');
-                    }
+                    showUploadIndicator('Auto-upload actief', 'success');
                 }
             } catch (error) {
                 console.error('Error checking existing login:', error);
@@ -2872,14 +2822,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeDates();
             loadData();
-            checkExistingLogin();
-            initializeAutoUpload();
-            updatePlanningWeekInfo();
+            checkExistingLogin(); // Check if user is already logged in
+            initializeAutoUpload(); // Initialize bullet-proof upload system
             
-            if (hasUnsavedChanges) {
-                showUploadIndicator('Niet-opgeslagen wijzigingen gevonden', 'uploading');
+            // Show registration counter status if there are pending registrations
+            if (registrationCounter > 0) {
+                showUploadIndicator(`${registrationCounter}/${UPLOAD_TRIGGER_COUNT} registraties tot auto-upload`, 'uploading');
             }
         });
+
+        // Save registration counter periodically
+        setInterval(saveRegistrationCounter, 30000); // Save every 30 seconds
     </script>
 </body>
 </html>
+            
