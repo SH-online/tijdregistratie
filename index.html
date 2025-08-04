@@ -2069,10 +2069,7 @@ function navigateMainWeek(direction) {
             selectedDate = new Date(currentWeekStart);
             selectedDate.setHours(0, 0, 0, 0);
             }
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            selectedDate = new Date(today);
-            
+
             loadExistingRegistrationsForSelectedDate(employeeName);
             
             document.getElementById('hours-modal-title').textContent = 
