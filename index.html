@@ -2515,11 +2515,8 @@ function navigateMainWeek(direction) {
         // Check for unsent data and auto-upload periodically
         function initializeAutoUpload() {
             // Try to upload every 10 minutes
-            setInterval(checkAndAutoUpload, 10 * 60 * 1000);
-            
-            // Also check on page load
-            setTimeout(checkAndAutoUpload, 5000); // Wait 5 seconds after load
-            
+            setInterval(checkAndAutoUpload, 60 * 60 * 1000);
+                      
             // Upload before page unload
             window.addEventListener('beforeunload', function(e) {
                 if (hasUnsentData()) {
