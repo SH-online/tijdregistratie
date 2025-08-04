@@ -2479,56 +2479,56 @@
         }
 
         async function sendDataReliable() {
-            if (isUploading) {
-                showStatus('Upload al bezig...', 'error');
+    if (isUploading) {
+        showStatus('Upload al bezig...', 'error');
+        return;
+    }
+    
+    if (!registrations || registrations.length === 0) {
+        showStatus('Geen data om te versturen', 'error');
+        return;
+    }
+
+    if (!account) {
+        showStatus('Log eerst in bij Microsoft om gegevens te versturen', 'error');
+        showUploadIndicator('Niet ingelogd - kan niet uploaden', 'error');
+        return;
+    }
+
+    isUploading = true;
+    let attempt = 1;
+    const maxAttempts = 5;
+    
+    while (attempt <= maxAttempts) {
+        try {
+            showUploadIndicator(`Uploaden... (${attempt}/${maxAttempts})`, 'uploading');
+
+            // Get access token with retry logic
+            let tokenResponse;
+            try {
+                const tokenRequest = {
+                    scopes: ['Files.ReadWrite'],
+                    account: account
+                };
+                tokenResponse = await msalInstance.acquireTokenSilent(tokenRequest);
+            } catch (tokenError) {
+                if (tokenError.message.includes('interaction_required')) {
+                    tokenResponse = await msalInstance.acquireTokenPopup(tokenRequest);
+                } else {
+                    throw tokenError;
+                }
+            }
+
+            const accessToken = tokenResponse.accessToken;
+
+            // Altijd alle registraties versturen (optie 1)
+            let unsentRegistrations = registrations;
+
+            if (unsentRegistrations.length === 0) {
+                showUploadIndicator('Geen data om te uploaden', 'success');
+                isUploading = false;
                 return;
             }
-            
-            if (!registrations || registrations.length === 0) {
-                showStatus('Geen data om te versturen', 'error');
-                return;
-            }
-
-            if (!account) {
-                showStatus('Log eerst in bij Microsoft om gegevens te versturen', 'error');
-                showUploadIndicator('Niet ingelogd - kan niet uploaden', 'error');
-                return;
-            }
-
-            isUploading = true;
-            let attempt = 1;
-            const maxAttempts = 5;
-            
-            while (attempt <= maxAttempts) {
-                try {
-                    showUploadIndicator(`Uploaden... (${attempt}/${maxAttempts})`, 'uploading');
-
-                    // Get access token with retry logic
-                    let tokenResponse;
-                    try {
-                        const tokenRequest = {
-                            scopes: ['Files.ReadWrite'],
-                            account: account
-                        };
-                        tokenResponse = await msalInstance.acquireTokenSilent(tokenRequest);
-                    } catch (tokenError) {
-                        if (tokenError.message.includes('interaction_required')) {
-                            tokenResponse = await msalInstance.acquireTokenPopup(tokenRequest);
-                        } else {
-                            throw tokenError;
-                        }
-                    }
-
-                    const accessToken = tokenResponse.accessToken;
-
-                    // Altijd alle registraties versturen (optie 1)
-let unsentRegistrations = registrations;
-
-if (unsentRegistrations.length === 0) {
-    showUploadIndicator('Geen data om te uploaden', 'success');
-    isUploading = false;
-    return;
-}
 
 // Prepare CSV data
 let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
