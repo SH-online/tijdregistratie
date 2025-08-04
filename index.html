@@ -1327,7 +1327,7 @@
                     
                     <div class="controls">
                         <button class="btn btn-secondary" onclick="closeHoursModal()">Annuleren</button>
-                        <button class="btn btn-primary" onclick="">Opslaan</button>
+                        <button class="btn btn-primary" onclick="saveRegistrationFromModal()">Opslaan</button>
                     </div>
                 </div>
             </div>
@@ -2666,27 +2666,7 @@ unsentRegistrations.forEach(reg => {
 
     showStatus(`CSV gedownload met ${registrations.length} registraties!`, 'success');
 }
-    
-    // Filter voor registraties die nog niet ge-upload zijn
-    const lastUpload = localStorage.getItem('last_successful_upload');
-    let unsentRegistrations;
-    
-    if (lastUpload) {
-        const lastUploadTime = new Date(lastUpload);
-        unsentRegistrations = registrations.filter(reg => {
-            const regTime = new Date(reg.date + 'T' + (reg.time || '00:00') + ':00');
-            return regTime > lastUploadTime;
-        });
-    } else {
-        // Als er nog nooit ge-upload is, alle registraties meenemen
-        unsentRegistrations = registrations;
-    }
-    
-    if (unsentRegistrations.length === 0) {
-        showStatus('Geen niet-verstuurde data om te downloaden', 'error');
-        return;
-    }
-    
+      
     let csvContent = 'Werknemer;Afdeling;Datum;Activiteit;Uren\n';
     
     unsentRegistrations.forEach(reg => {
