@@ -1564,6 +1564,25 @@
         mainWeekDisplay.textContent = 
             `Week ${getWeekNumber(currentWeekStart)} - ${startStr} t/m ${endStr} ${year}`;
     }
+    
+    // Disable/enable next week button based on current week
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextWeekStart = new Date(currentWeekStart);
+    nextWeekStart.setDate(currentWeekStart.getDate() + 7);
+    
+    const nextWeekButton = document.querySelector('button[onclick="navigateMainWeek(1)"]');
+    if (nextWeekButton) {
+        if (nextWeekStart > today) {
+            nextWeekButton.disabled = true;
+            nextWeekButton.style.opacity = '0.5';
+            nextWeekButton.style.cursor = 'not-allowed';
+        } else {
+            nextWeekButton.disabled = false;
+            nextWeekButton.style.opacity = '1';
+            nextWeekButton.style.cursor = 'pointer';
+        }
+    }
 }
 
 function navigateMainWeek(direction) {
