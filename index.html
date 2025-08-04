@@ -1527,7 +1527,7 @@
 
         // Enhanced upload tracking variables
         let registrationCounter = 0; // Track number of registrations since last upload
-        const UPLOAD_TRIGGER_COUNT = 10; // Upload after every 10 registrations
+        const UPLOAD_TRIGGER_COUNT = 25; // Upload after every 10 registrations
 
         function showStatus(message, type) {
             const statusEl = document.getElementById('status-message');
@@ -2521,23 +2521,11 @@
 
                     const accessToken = tokenResponse.accessToken;
 
-                    // Filter voor registraties die nog niet ge-upload zijn
-const lastUpload = localStorage.getItem('last_successful_upload');
-let unsentRegistrations;
-
-if (lastUpload) {
-    const lastUploadTime = new Date(lastUpload);
-    unsentRegistrations = registrations.filter(reg => {
-        const regTime = new Date(reg.date + 'T' + (reg.time || '00:00') + ':00');
-        return regTime > lastUploadTime;
-    });
-} else {
-    // Als er nog nooit ge-upload is, alle registraties meenemen
-    unsentRegistrations = registrations;
-}
+                    // Altijd alle registraties versturen (optie 1)
+let unsentRegistrations = registrations;
 
 if (unsentRegistrations.length === 0) {
-    showUploadIndicator('Geen nieuwe data om te uploaden', 'success');
+    showUploadIndicator('Geen data om te uploaden', 'success');
     isUploading = false;
     return;
 }
