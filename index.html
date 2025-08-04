@@ -1567,8 +1567,22 @@
 }
 
 function navigateMainWeek(direction) {
-    // Verschuif de week met 7 dagen
-    currentWeekStart.setDate(currentWeekStart.getDate() + (direction * 7));
+    // Bereken de nieuwe week
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() + (direction * 7));
+    
+    // Check of we naar de toekomst proberen te gaan
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Als we naar de toekomst gaan (direction = 1) en de nieuwe week nog niet begonnen is
+    if (direction > 0 && newWeekStart > today) {
+        showStatus('Kan niet naar toekomstige weken navigeren', 'error');
+        return; // Stop hier, ga niet verder
+    }
+    
+    // Update currentWeekStart naar de nieuwe week
+    currentWeekStart = newWeekStart;
     
     // Update displays
     updateMainWeekDisplay();
@@ -1578,7 +1592,6 @@ function navigateMainWeek(direction) {
         displayPlanningTable();
     }
 }
-
         function showStatus(message, type) {
             const statusEl = document.getElementById('status-message');
             statusEl.textContent = message;
